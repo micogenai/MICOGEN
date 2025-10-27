@@ -40,7 +40,7 @@ This project implements a multi-stage pipeline for code comment generation:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/micogenai/MICOGEN
 cd MICOGen
 ```
 
