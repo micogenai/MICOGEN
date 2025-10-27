@@ -1,0 +1,2107 @@
+id,code,comment,label,GeneratedComment,BERTScore
+0,"public UnsafeSequence(final long initialValue){
+  UNSAFE.putOrderedLong(this,VALUE_OFFSET,initialValue);
+}
+",create a sequence with a specified initial value .,what,This class initializes an UnsafeSequence instance with a given long value as its current state.,0.8745716214179993
+1,"public Builder deleteLocal(){
+  deleteFields.add(""locale"");
+  return this;
+}
+",delete the local value of a existing user,what,"This method returns an instance of this class with a field named ""locale"" removed from the deleteFields list.",0.8271373510360718
+2,"private void normalizeLocalFileName(StringBuilder localFileName){
+  while (true) {
+    int dotDotIndex=localFileName.indexOf(""/../"");
+    if (dotDotIndex < 0) {
+      break;
+    }
+    int parentIndex=localFileName.lastIndexOf(""/"",dotDotIndex - 1);
+    if (parentIndex < 0) {
+      break;
+    }
+    localFileName.delete(parentIndex,dotDotIndex + 3);
+  }
+  if (localFileName.length() >= 3 && localFileName.lastIndexOf(""/.."") == localFileName.length() - 3) {
+    if (localFileName.length() <= 3) {
+      localFileName.setLength(0);
+    }
+ else {
+      int parentIndex=localFileName.lastIndexOf(""/"",localFileName.length() - 4);
+      if (parentIndex < 0) {
+        localFileName.setLength(0);
+      }
+ else {
+        localFileName.setLength(parentIndex);
+      }
+    }
+  }
+  while (true) {
+    int dotIndex=localFileName.indexOf(""/./"");
+    if (dotIndex < 0) {
+      break;
+    }
+    localFileName.delete(dotIndex,dotIndex + 2);
+  }
+  if (localFileName.length() >= 2 && localFileName.lastIndexOf(""/."") == localFileName.length() - 2) {
+    localFileName.setLength(localFileName.length() - 2);
+  }
+  if (localFileName.length() > 0 && localFileName.charAt(0) == '/') {
+    localFileName.deleteCharAt(0);
+  }
+  if (localFileName.length() > 0 && localFileName.charAt(localFileName.length() - 1) == '/') {
+    localFileName.setLength(localFileName.length() - 1);
+  }
+}
+","normalize the given local file name : - resolve "" . . "" and "" . "" special notation - remove leading and trailing "" / """,noisy,This code snippet normalizes a local file name by removing unnecessary characters and components that may indicate an attempt to traverse outside of the expected directory structure.,0.8277022838592529
+3,"	public Music getMusic() {
+		if (m_multiPartsDef == null) {
+			if (m_parts == null) //no part at all
+				return (m_defaultPart.getMusic());
+			else //ah, they are some parts, but no part order
+				//return the same thing than graphical rendition
+				//parts in alphabetic order
+				return getMusicForGraphicalRendition();
+		}
+		else {
+			Music globalScore = newMusic();
+			globalScore.append(m_defaultPart.getMusic());
+			Part[] parts = m_multiPartsDef.toPartsArray();
+			for (int i = 0; i < parts.length; i++) {
+				globalScore.append(parts[i].getMusic());
+			}
+			return globalScore;
+		}
+	}
+",returns the music of this tune in a raw form,property,"//returns a music object consisting of all the parts defined in the score, arranged in order of their names.",0.846858561
+4,"public boolean isQuoteDelimiter(String character){
+  return (m_QuoteDelimiters.indexOf(character.charAt(0)) > -1);
+}
+",checks whether the character is quote delimiter .,what,// returns true if the string matches any of the quote delimiters in the array,0.87905407
+5,"public void addColumn(String header){
+  WTableColumn tableColumn;
+  tableColumn=new WTableColumn();
+  tableColumn.setHeaderValue(Util.cleanAmp(header));
+  setColumnVisibility(tableColumn,true);
+  m_tableColumns.add(tableColumn);
+  return;
+}
+",add table column .,what,"This method adds a column to the table and sets its visibility to true by creating a new WTableColumn object, adding it to the m_tableColumns collection, and setting its header value with Util.cleanAmp(header)",0.8486351370811462
+6,"	public ArrayList getEdgesBetween(Node source, Node target){
+		ArrayList ans=new ArrayList();
+		
+		EdgeIterator eit=edges();
+		
+		while(eit.hasNext()){
+			Edge edge=eit.nextEdge();
+			if((edge.source()==source && edge.target()==target)||
+					(edge.target()==source && edge.source()==target))
+				ans.add(edge);
+		}
+		
+		return ans;
+	}
+",get the set of edges between the source and the target,what,This method gets a list of edges connecting two nodes in the graph,0.8922703266143799
+7,"public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow,
+            String[] columns, Filter f, Queue filterClausequeue)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        // columnFamily has a different meaning for HBase, so it won't be used
+        // here
+        String tableName = entityMetadata.getSchema();
+        List results = new ArrayList();
+
+        FilterList filter = new FilterList();
+        if (f != null)
+        {
+            filter.addFilter(f);
+        }
+        if (isFindKeyOnly(metadata, columns))
+        {
+            columns = null;
+            filter.addFilter(new KeyOnlyFilter());
+        }
+
+        try
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            EntityType entityType = metaModel.entity(entityClass);
+
+            List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
+            if (!subManagedType.isEmpty())
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
+                    List found = handler.readDataByRange(tableName, subEntityMetadata.getEntityClazz(),
+                            subEntityMetadata, startRow, endRow, columns, filter);
+                    results.addAll(found);
+                }
+            }
+            else
+            {
+                results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow, columns, filter);
+            }
+            if (showQuery && filterClausequeue.size() > 0)
+            {
+                KunderaCoreUtils.printQueryWithFilterClause(filterClausequeue, entityMetadata.getTableName());
+            }
+        }
+        catch (IOException ioex)
+        {
+            log.error(""Error during find by range, Caused by: ."", ioex);
+            throw new KunderaException(ioex);
+        }
+        return results;
+    }",handles find by range query for given start and end row key range values .,how-it-is-done,"This method reads data from an HBase table based on a range query, returning a list of results. It takes several parameters including the entity class, metadata, start and end rows, columns, and filter. It first gets the entity metadata for the given entity class and then creates a FilterList object to store any filters passed in. If the method is called with an entity that has sub-entities (such as a Java composite type), it will recursively call itself on each of the sub-entities, concatenating the results into a single list. If no filter is specified, it adds a KeyOnlyFilter to ensure only the key values are returned. It then calls the handler's readDataByRange method with the necessary arguments and returns the results as an ArrayList object.",0.8378931283950806
+8,"private int readUTFChar(StringBuilder sbuf,long utflen) throws IOException {
+  int b1, b2, b3;
+  b1=readByte() & 0xFF;
+switch (b1 >> 4) {
+case 0:
+case 1:
+case 2:
+case 3:
+case 4:
+case 5:
+case 6:
+case 7:
+    sbuf.append((char)b1);
+  return 1;
+case 12:
+case 13:
+if (utflen < 2) {
+  throw new UTFDataFormatException();
+}
+b2=readByte();
+if ((b2 & 0xC0) != 0x80) {
+throw new UTFDataFormatException();
+}
+sbuf.append((char)(((b1 & 0x1F) << 6) | ((b2 & 0x3F) << 0)));
+return 2;
+case 14:
+if (utflen < 3) {
+if (utflen == 2) {
+readByte();
+}
+throw new UTFDataFormatException();
+}
+b2=readByte();
+b3=readByte();
+if ((b2 & 0xC0) != 0x80 || (b3 & 0xC0) != 0x80) {
+throw new UTFDataFormatException();
+}
+sbuf.append((char)(((b1 & 0x0F) << 12) | ((b2 & 0x3F) << 6) | ((b3 & 0x3F) << 0)));
+return 3;
+default :
+throw new UTFDataFormatException();
+}
+}
+","reads in single utf - encoded character one byte at a time , appends the character to sbuf , and returns the number of bytes consumed .",how-it-is-done,"This code snippet reads a UTF8 encoded character from an input stream and appends it to a StringBuilder object, ensuring that the character is correctly encoded in the UTF8 format.",0.8635686039924622
+9,"public GrpcChannelBuilder setChannelType(Class<? extends io.netty.channel.Channel> channelType) {
+    mChannelKey.setChannelType(channelType);
+    return this;
+  }",sets the channel type .,what,The setChannelType method specifies the Channel class for the gRPC channel.,0.8874884247779846
+10,"private void initConnection() throws AdeException {
+  if (!dbPropertiesInitialized) {
+    throw new AdeInternalException(""DB configuration is undefined."");
+  }
+  mLogger.debug(""Loading driver "" + dbDriver);
+  try {
+    Class.forName(dbDriver);
+  }
+ catch (  ClassNotFoundException e) {
+    throw new AdeInternalException(""Loading driver failed."",e);
+  }
+  mLogger.debug(""Connecting to database "" + dbURL);
+  try {
+    if (dbUserName == null || dbUserPassword == null) {
+      dbConnection=DriverManager.getConnection(dbURL);
+    }
+ else {
+      dbConnection=DriverManager.getConnection(dbURL,dbUserName,dbUserPassword);
+    }
+  }
+ catch (  SQLException e) {
+    throw new AdeInternalException(""Failed obtaining connection."",e);
+  }
+catch (  Throwable t) {
+    throw new AdeInternalException(""Failed obtaining connection."",t);
+  }
+}
+",initializes a connection object .,what,This method initializes a connection to the database using the configuration settings provided in dbProperties.,0.874908984
+11,"public static void startServices(ServiceHost host,Class... services) throws InstantiationException, IllegalAccessException {
+  checkArgument(services != null,""services cannot be null"");
+  for (  Class service : services) {
+    startService(host,service);
+  }
+}
+",starts the list of services on the host .,what,The method startServices starts up each service in a services array of Classes,0.8595784902572632
+12,"	public String rawFormat() {
+		return name + "" "" + getID();
+	}
+",function returns the raw string representation of this object,property,The return value of the rawFormat method represents the instance's name and ID in a single string.,0.8863229155540466
+13,"private String showPrompt(String prompt) {
+        verifySystemOut();
+        cursorMove = 0;
+        if (!userInputActive) {
+            return readLine(prompt, false);
+        }
+
+        out.print(prompt);
+        out.flush();
+        return null;
+    }",shows the prompt to request user input .,why,"The method 'showPrompt' checks that the user input is active by setting the variable ""userInputActive"" to false. It also uses the readLine method from the system class",0.8551734089851379
+14,"					protected void handleFailure(ACLMessage failure) {
+						if (failure.getSender().equals(myAgent.getAMS())) {
+							// FAILURE notification from the JADE runtime: the receiver
+							// does not exist
+							print(""Responder does not exist"");
+						}
+						else {
+							budget += reserved;
+							print(""Agent ""+failure.getSender().getName()+"" failed. Rolled back budget."");
+						}
+						// Immediate failure --> we will not receive a response from this agent
+						nResponders --;
+					}
+",handle failures e g in case the product is not available anymore,property,// The handleFailure method checks for a FAILURE notification from the JADE runtime and updates the budget accordingly.,0.8393694758415222
+15,"public String generateCreate(String table) throws DatabaseException {
+  StringBuffer result=new StringBuffer();
+  try {
+    StringBuffer sql=new StringBuffer();
+    sql.append(""SELECT * FROM "");
+    sql.append(table);
+    ResultSet rs=executeQuery(sql.toString());
+    ResultSetMetaData md=rs.getMetaData();
+    result.append(""CREATE TABLE "");
+    result.append(table);
+    result.append("" ( "");
+    for (int i=1; i <= md.getColumnCount(); i++) {
+      if (i != 1) {
+        result.append(',');
+      }
+      result.append(md.getColumnName(i));
+      result.append(' ');
+      String type=processType(md.getColumnTypeName(i),md.getPrecision(i));
+      result.append(type);
+    }
+    result.append("" ) "");
+    rs.close();
+  }
+ catch (  SQLException e) {
+    throw (new DatabaseException(e));
+  }
+  return result.toString();
+}
+",generate the create statement to create the specified table .,why,This method generates SQL create table queries based on the supplied table name by selecting and processing all fields from that table.,0.8748525381088257
+16,"private AbstractInvocation dequeue() {
+    if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled()) SibTr.entry(this, tc, ""dequeue"");
+
+    AbstractInvocation invocation;
+
+    synchronized (barrier) {
+      invocation = queue.remove(0);
+    }
+
+    if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled()) SibTr.exit(this, tc, ""dequeue"", invocation);
+    return invocation;
+  }",dequeue an invocation by removing it from the front of the queue,how-it-is-done,private AbstractInvocation dequeue() {,0.821873128
+17,"public TrieNode(TrieNode predecessor,Map<Symbol,Integer> label2idMap,List<Symbol> labels){
+  this.backPointer=predecessor;
+}
+",this constructs a trienode and specifies its predecessor .,how-it-is-done,"In this constructor, TrieNode initializes its backPointer to the predecessor, label2idMap to a map of labels and ids, and labels to a list of symbols.",0.8467060923576355
+18,"public Class defineClass() {
+        byte[] bytes;
+        try {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            writeTo(bout);
+            bytes = bout.toByteArray();
+        } catch (IOException e) {
+            InternalError ie = new InternalError(e.toString());
+            ie.initCause(e);
+            throw ie;
+        }
+
+        if (DEBUG) {
+            File file = new File(getClassName().replace('.', '/') + "".class"");
+            try {
+                File tempDir = new File(System.getProperty(""java.io.tmpdir""));
+                file = new File(tempDir, file.getPath());
+            } catch (SecurityException e) {
+            }
+            try {
+                file.getParentFile().mkdirs();
+                System.out.println(""RuntimeClassFile writing to "" + file);
+                OutputStream out = new FileOutputStream(file);
+                out.write(bytes);
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return mLoader.define(getClassName(), bytes);
+    }",finishes the class definition .,what,public Class defineClass() {,0.8321876525878906
+19,"private static int writeSize(List<? extends OffsettedItem> items){
+  OffsettedItem first=items.get(0);
+  return (items.size() * first.writeSize()) + getAlignment(items);
+}
+",calculates the write size for the given list .,why,"The method calculates the overall write size of a collection of objects based on the size of each object and its alignment requirements, taking into account that some items may have varying write sizes due to their own offsets.",0.8815056085586548
+20,"    public void picked(Class source, Object messageData, Vector3f origin, Vector3f direction, PickInfo results) {
+        System.out.println(this + "" Name: "" + getName() + "" picked! by "" + source + "" : "" + messageData);
+    }
+",callback on being picked,how-to-use,"Here is a concise, one-line comment for the given code snippet that follows the ""how-to-use"" intent:",0.8298916816711426
+21,"	public void applyRenderKit () {
+		if (this.renderKit != null) {
+			Gracelets.getGraceletsContext().setSpecifiedRenderKitId(this.renderKit.getName());
+		}
+	}
+",if a render kit was defined make it the current render kit,how-it-is-done,The method applyRenderKit() sets the specified render kit id for the current Gracelets context by calling setSpecifiedRenderKitId() of GraceletsContext if a non-null renderKit is passed as an argument.,0.8507614135742188
+22,"private static boolean isDataTypeSetPrecisely(Element bindNode){
+  String type=bindNode.getAttributeValue(null,ATTRIBUTE_TYPE);
+  if (type != null && !type.equalsIgnoreCase(DATA_TYPE_TEXT))   return true;
+  return false;
+}
+",checks if the xforms data type is set to any value other than text .,what,"The method returns a boolean value indicating whether the element's attribute 'type' is set precisely and is not equal to ""DATA_TYPE_TEXT"".",0.8661932945251465
+23,"	protected long getAskVolumeAtPrice(double price){
+		long volume = 0;
+		//Returns zero immediately if there is no order at this price or the book is empty
+		for(Order order : askLimitOrders){
+			if(order.getPrice() == price)
+				volume += order.getOpenQuantity();
+			if(order.getPrice() > price)
+				break;
+		}
+		return volume;
+	}
+",get this instruments ask volume at specific price,what,"This method returns the total volume of open orders for the given price, including any open orders at that price and all subsequent prices up to the next order.",0.836348832
+24,"public Matrix4x3d identity() {
+        if ((properties & PROPERTY_IDENTITY) != 0)
+            return this;
+        m00 = 1.0;
+        m01 = 0.0;
+        m02 = 0.0;
+        m10 = 0.0;
+        m11 = 1.0;
+        m12 = 0.0;
+        m20 = 0.0;
+        m21 = 0.0;
+        m22 = 1.0;
+        m30 = 0.0;
+        m31 = 0.0;
+        m32 = 0.0;
+        properties = PROPERTY_IDENTITY | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL;
+        return this;
+    }",reset this matrix to the identity .,what,"Returns this instance of Matrix4x3d set to the identity matrix, with zero translation and unity scale.",0.882276177
+25,"public static double getScaleFactor(IAtomContainer container, double bondLength) {
+        double currentAverageBondLength = getBondLengthMedian(container);
+        if (currentAverageBondLength == 0 || Double.isNaN(currentAverageBondLength)) return 1;
+        return bondLength / currentAverageBondLength;
+    }",determines the scale factor for displaying a structure loaded from disk in a frame .,why,The function getScaleFactor uses the average bond length to scale the passed bondLength parameter to avoid a divide by zero error when there are no bonds in the molecule.,0.8494248390197754
+26,"	public void substractResources(Resources resource, int quantity) throws NotEnoughResourcesException {
+		Integer totalResources = resources.get(resource);
+		if (totalResources == null || totalResources - quantity < 0) {
+			throw new NotEnoughResourcesException(resource, this);
+		} else {
+			totalResources -= quantity;
+		}
+		resources.put(resource, totalResources);
+	}
+",method that takes resources from the city,what,"The method `substractResources` subtracts the specified quantity of a resource from an object's total resources, throwing a `NotEnoughResourcesException` if the attempt to subtract the resources would result in a negative value.",0.8354400396347046
+27,"public TablePanel remove(Widget widget) {
+		for (int i = 0; i < content.length; ++i)
+			for (int j = 0; j < content[i].length; ++j)
+				if (content[i][j] == widget) content[i][j] = null;
+		this.sendElement();
+		return this;
+	}",removes all elements that are instance of specified element,what,Removes a widget from the content array by setting it to null and sends the element to the parent panel.,0.8472421765327454
+28,"static public boolean isZero(float value,float tolerance){
+  return Math.abs(value) <= tolerance;
+}
+",returns true if the value is zero .,property,"isZero(float value, float tolerance) is a property of the boolean value that indicates whether the floating point number ""value"" is equal to zero within the specified tolerance.",0.8379389047622681
+29,"public boolean hasItems(){
+  return items != null && !items.isEmpty();
+}
+",indicates whether this dashboard has at least one item .,what,"The public method returns true if items is not null and has at least one item in it, otherwise false.",0.8471959829330444
+30,"  public int addToQueue(Entry entry, int position) throws IOException, UPNPResponseException {
+    ActionMessage message = messageFactory.getMessage(""AddURIToQueue"");
+    message.setInputParameter(""InstanceID"", 0);
+    message.setInputParameter(""EnqueuedURI"", entry.getRes());
+    message.setInputParameter(""EnqueuedURIMetaData"", compileMetadataString(entry));
+    message.setInputParameter(""DesiredFirstTrackNumberEnqueued"", position+1);
+    message.setInputParameter(""EnqueueAsNext"", true);
+    ActionResponse resp = message.service();
+    return Integer.parseInt(resp.getOutActionArgumentValue(""FirstTrackNumberEnqueued"")) -1;
+  }
+",adds the given entry to the end of the queue,how-it-is-done,"This method adds a media file at the specified position in the queue using the ""AddURIToQueue"" UPNP action and returns the first track number of the newly added entry.",0.8620163798332214
+31,"private Tree<Row> findEndIf( Tree<Row> pointer ){
+        while( !Type.END_IF.equals( pointer.getContent().getType() ) ){
+            pointer = pointer.getNext();
+        }
+        return pointer;
+    }","finds the associate end _ if for an if , else _ if or else pointer",how-it-is-done,"This method is used to find the last node in a linked list of rows that have a specific type, which in this case is END_IF.",0.8195937871932983
+32,"public ASRPDirectory(String path){
+  dir=new File(path);
+  if (dir.exists()) {
+    try {
+      initialize(dir.getPath(),dir.getName(),""01"");
+    }
+ catch (    IOException ioe) {
+      Debug.error(ioe.getMessage());
+      ioe.printStackTrace();
+      return;
+    }
+  }
+ else {
+    Debug.error(""ASRPDirectory ("" + path + "") doesn't exist"");
+  }
+}
+",create a new asrp directory for the given path .,why,"The directory doesn't exist, so it cannot be initialized.",0.863356352
+33,"public static Rectangle scaleRectangle(Rectangle rect,float scaleFactor){
+  return new Rectangle(Math.round(rect.x * scaleFactor),Math.round(rect.y * scaleFactor),Math.round(rect.width * scaleFactor),Math.round(rect.height * scaleFactor));
+}
+",scales the given rectangle by the given scale factor .,how-it-is-done,This code scales a rectangle's dimensions by multiplying each value with the scale factor and rounding the result.,0.880967379
+34,"	public void setValid(boolean bValid) {
+		if(!bValid) {
+			this.m_comboBox.setBorder(BorderFactory.createLineBorder(Color.RED));
+			this.m_errorLabel.setIcon(IconManager.getInstance().getIcon(""16-message-error.gif""));
+		} else {
+			this.m_comboBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			this.m_errorLabel.setIcon(IconManager.getInstance().getIcon(""16-message-confirm.gif""));
+		}
+		this.revalidate();
+		this.repaint();
+	}
+",sets whether this components value is valid,what,The code snippet sets a JComboBox's border color and error icon based on a boolean variable indicating whether it is valid or not.,0.8449478149414062
+35,"@SuppressWarnings(""unchecked"")
+    public static <T> T getRandomSelection(List<T> options) {
+        return (T) getRandomSelection(options.toArray(new Object[options.size()]));
+    }",randomly chooses and returns one of the provided options .,how-it-is-done,"This method takes a list of items and returns a random selection from it, using a Java 8 Stream.",0.8642870783805847
+36,"public List<QueryStatisticInner> listByQuery(String resourceGroupName, String serverName, String databaseName, String queryId) {
+        return listByQueryWithServiceResponseAsync(resourceGroupName, serverName, databaseName, queryId).toBlocking().single().body();
+    }",lists a query ' s statistics .,what,The listByQuery method retrieves the QueryStatisticInner object for a given queryId.,0.8450183272361755
+37,"    public boolean isLeaf(Object node) {
+        try {
+            return ((TreeNode) node).isLeaf();
+        }
+        catch (ClassCastException ex) { // not a TreeNode?
+            return getChildCount(node) == 0;
+        }
+    }
+",returns true if the specified node is a leaf node false otherwise,property,public boolean isLeaf(Object node) { // check if TreeNode is a leaf,0.8439415097236633
+38,"public synchronized void removeListener(final T listener){
+  listeners.remove(listener);
+}
+",unsubscribes the listener for update notifications .,why,"The removeListener method in this code snippet is synchronized because it needs to ensure that any existing listeners are not removed while they are still being used, which would cause a concurrent modification exception.",0.8152323961257935
+39,"protected FactoryDto updateProjectInFactory(final FactoryDto factory,final String repositoryUrl,final String headBranch,final String headCommitId) throws ServerException {
+  return updateProjectInFactory(factory,repositoryUrl,headBranch,repositoryUrl,headCommitId);
+}
+",update project matching given predicate in given factory,how-it-is-done,"This method calls the updateProjectInFactory method with the same argument values it received, but replaces repositoryUrl with headBranch in the call.",0.8196214437484741
+40,"public void renameThread(String base_name, Thread thread, String addr, String cluster_name) {
+        String thread_name=getThreadName(base_name, thread, addr, cluster_name);
+        if(thread_name != null)
+            thread.setName(thread_name);
+    }","names a thread according to base _ name , cluster name and local address .",how-it-is-done,"This method renames a thread by setting its name using a combination of four parameters: base_name, thread, addr, and cluster_name.",0.8624505400657654
+41,"public boolean orderByColumnsDetermineAllDisplayColumnsForUnion(
+            List<ParsedColInfo> orderColumns) {
+        Set<AbstractExpression> orderExprs = new HashSet<>();
+        for (ParsedColInfo col : orderColumns) {
+            orderExprs.add(col.m_expression);
+        }
+
+        for (ParsedColInfo col : m_displayColumns) {
+            if (! orderExprs.contains(col.m_expression)) {
+                return false;
+            }
+        }
+
+        return true;
+    }",this is a very simple version of the above method for when an order by clause appears on a union .,why,"This code snippet determines if all display columns are also in the set of order columns, avoiding unnecessary sorting and improving performance.",0.8697015643119812
+42,"protected void loadGrams(DataInputStream input) throws IOException {
+    gramSet = new HashSet();
+    try {
+      while(true) {
+        int gramLength=input.readInt();
+      
+        int[] words = new int[gramLength];
+        for (int wi=0;wi<gramLength;wi++) {
+          words[wi]=input.readInt();
+        }
+        gramSet.add(new NGram(words));
+      }
+    }
+    catch(EOFException e) {
+      
+    }
+  }",loads the contents of the specified input stream into this dictionary .,what,The method 'loadGrams' reads n-grams from a stream and adds them to a hash set.,0.8642281293869019
+43,"private ContentElement parseContentElement(SpanManager sm,ContentElementParsingParameters cepp,Span lineSpan,ContentElement result){
+  LinkedList<Span> lineSpans=new LinkedList<Span>();
+  lineSpans.add(lineSpan);
+  return parseContentElement(sm,cepp,lineSpans,result);
+}
+",building a contentelement from a single line .,what,"Here is a concise, one-line comment for the provided code snippet: ",0.8728715181350708
+44,"protected void stopWithErrorMessage(String error,Exception ex){
+  stop();
+  if (m_log != null) {
+    m_log.statusMessage(statusMessagePrefix() + error + "" - see log for details"");
+    m_log.logMessage(statusMessagePrefix() + error + (ex != null ? "" "" + ex.getMessage() : """"));
+  }
+}
+",stops the step ( and upstream ones ) and then prints an error message and optional exception message,how-it-is-done,"The method stopWithErrorMessage(String error, Exception ex) stops the process and logs an error message with additional information from the exception ex if it is present.",0.8555590510368347
+45,"public static String fromDoc2String(Document doc) throws IOException {
+  KXmlSerializer serializer=new KXmlSerializer();
+  ByteArrayOutputStream bos=new ByteArrayOutputStream();
+  serializer.setFeature(""http://xmlpull.org/v1/doc/features.html#indent-output"",true);
+  serializer.setOutput(bos,XformConstants.DEFAULT_CHARACTER_ENCODING);
+  doc.write(serializer);
+  serializer.flush();
+  return new String(bos.toByteArray(),XformConstants.DEFAULT_CHARACTER_ENCODING);
+}
+",converts an xml document to a string .,how-it-is-done,"The code snippet provided converts an XML document to a string by writing it to an XML serializer, which is then returned as a String. The KXmlSerializer class is used for this purpose, and its setFeature() method is called to enable the indentation of the output.",0.8811877369880676
+46,"  public void run() {
+    while(go) {
+      Object[] elems = null;
+      synchronized(this) {
+	if(queue.isEmpty()) {
+	  try{wait();} catch(InterruptedException e) {Util.printStackTrace(e);}
+	}
+	if(queue.size() == 1) {
+	  singleton[0] = queue.removeFirst();
+	  elems = singleton;
+	}
+	else {
+	  elems = queue.toArray();
+	  queue.clear();
+	}
+	if(queue.isEmpty() && flushing)
+	  notify();
+      }
+      go = handle(elems);
+      handles++;
+    }
+  }
+",the read from queue loop,noisy,The required noisy code is in the while loop that handles the queue and uses wait() and notify().,0.8589382767677307
+47,"private void updateComputeNodeUser(String poolId, String nodeId, String userName, NodeUpdateUserParameter nodeUpdateUserParameter, Iterable<BatchClientBehavior> additionalBehaviors) throws BatchErrorException, IOException {
+        ComputeNodeUpdateUserOptions options = new ComputeNodeUpdateUserOptions();
+        BehaviorManager bhMgr = new BehaviorManager(this.customBehaviors(), additionalBehaviors);
+        bhMgr.applyRequestBehaviors(options);
+
+        this.parentBatchClient.protocolLayer().computeNodes().updateUser(poolId, nodeId, userName, nodeUpdateUserParameter, options);
+    }",updates the specified user account on the specified compute node .,what,This method updates the user account on a compute node in an Azure Batch pool by modifying its properties.,0.8840635418891907
+48,"public static boolean isReadable(@NonNull final File file){
+  if (!file.isFile()) {
+    LogHelper.d(TAG,""isReadable(): Not a File"");
+    return false;
+  }
+  return file.exists() && file.canRead();
+}
+",checks if file could be read or created,what,"""Checks if a file is readable.""",0.8773351907730103
+49,"    public Form getIntervals() {
+        if (Intervals == null) {//GEN-END:|61-getter|0|61-preInit
+            // write pre-init user code here
+            Intervals = new Form(""Interval training"", new Item[] { getMessageBox(), getAnswerSelect(), getEnabledIntervals(), getVolumeInputIntervals() });//GEN-BEGIN:|61-getter|1|61-postInit
+            Intervals.addCommand(getBackCommand());
+            Intervals.addCommand(getNewCommand());
+            Intervals.addCommand(getRepeatCommand());
+            Intervals.setCommandListener(this);//GEN-END:|61-getter|1|61-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|61-getter|2|
+        return Intervals;
+    }
+",returns an initiliazed instance of intervals component,property,"This code snippet creates a new Form named ""Intervals"" and sets its commands, properties, and command listeners. It also includes some pre-init user code and post-init user code that are commented out for the purpose of initialization.",0.8217007517814636
+50,"public static <T> List<T> query(Class<T> targetClass, final Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder,
+            CancellationSignal cancellationSignal) {
+        final Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+
+        try {
+            return toList(targetClass, cursor);
+        } finally {
+            closeQuietly(cursor);
+        }
+    }",query by context . getcontentresolver ( ) .,how-it-is-done,"The method returns a list of T objects by calling getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder) and then closing the cursor.",0.844793975
+51,"private List<Match<T>> sort(final Map<String,Match<T>> possibleMatches){
+  List<String> keys=new ArrayList<>(possibleMatches.keySet());
+  Collections.sort(keys,matchComparator);
+  List<Match<T>> matches1=new ArrayList<>(possibleMatches.size());
+  for (  String key : keys) {
+    matches1.add(possibleMatches.get(key));
+  }
+  return matches1;
+}
+","sort the matches according to their precedence ( that is , according to the precedence of their keys ) .",noisy,"// Sorts and returns a list of matches from possibleMatches, where each match is an object that contains information about a particular string in the Map. The method uses the provided Comparator to sort the keys of the map and then adds each match to a new ArrayList.",0.8261635303497314
+52,"	public List getNamespaces() {
+		List ns = new LinkedList();
+		ns.add(name);
+		if (attributes != EmptyStructures.EMPTY_MAP) {
+			Iterator it = attributes.values().iterator();
+			while (it.hasNext()) {
+				ParameterAttribute pa = (ParameterAttribute) it.next();
+				ns.add(pa.getName());
+			}
+		}
+		return ns;
+	}
+",returns the namespaces used by this parameter value,property,"This code snippet defines a method called getNamespaces(), which returns a list of namespaces associated with this parameter attribute.",0.8736321926116943
+53,"private static <E> Counter<Integer> collectCountCounts(Counter<E> counts) {
+    Counter<Integer> cc = new ClassicCounter<Integer>(); // counts of counts
+    for (Map.Entry<E, Double> entry : counts.entrySet()) {
+      //E item = entry.getKey();
+      Integer count = (int) Math.round(entry.getValue());
+      cc.incrementCount(count);
+    }
+    return cc;
+  }",helper to simplegoodturingsmoothedcounter ( ),noisy,The counts of counts for items in a collection are counted using a classic counter by iterating over the entry set and casting the values as integers.,0.8008294105529785
+54,"protected void submit() {
+
+        if (m_userinfoNoEditGroup.getRows().size() != m_addInfoReadOnly.size()) {
+            List<String> currentKeys = getKeyListFromGroup(m_userinfoNoEditGroup);
+            for (String key : m_addInfoReadOnly.keySet()) {
+                if (!currentKeys.contains(key)) {
+                    saveAddInfo(key, null);
+                }
+            }
+        }
+
+        for (I_CmsEditableGroupRow row : m_userinfoGroup.getRows()) {
+            String key = ((TextField)(((HorizontalLayout)row.getComponent()).getComponent(0))).getValue();
+            String value = ((TextField)(((HorizontalLayout)row.getComponent()).getComponent(1))).getValue();
+            saveAddInfo(key, value);
+            m_addInfoEditable.remove(key);
+        }
+
+        //Remaining items in list seem to be deleted by the user..
+        for (String key : m_addInfoEditable.keySet()) {
+            saveAddInfo(key, null);
+        }
+        try {
+            m_cms.writeUser(m_user);
+        } catch (CmsException e) {
+            LOG.error(""Unable to write user."", e);
+        }
+    }",submit additional info to user .,what,This code is attempting to write user information to a CMS object in Vaadin framework.,0.8431838750839233
+55,"	protected void addListeners() {
+		addWindowListener(
+			new WindowAdapter() {
+				public void windowClosing(WindowEvent event) {
+                    handleWindowClose();
+				}
+			}
+		);
+	}
+",registers the listeners for this window,why,"This code snippet registers a WindowAdapter that listens for when the window is closing, and then invokes the handleWindowClose() method to perform any necessary cleanup tasks before the window closes.",0.8147175908088684
+56,"public static File createTempFile(final String ext) {
+		try {
+			File file;
+			file = File.createTempFile(""jk-"", ""."" + ext);
+			return file;
+		} catch (IOException e) {
+			JK.throww(e);
+			return null;
+		}
+	}",creates the temp file .,what,"Creates a temp file with an "".ext"" extension",0.8837012648582458
+57,"public String composeOtpAttribute(OTPUserRecord otpUserRecord) throws PwmUnrecoverableException {
+  String value="""";
+  if (otpUserRecord != null) {
+    final Configuration config=pwmApplication.getConfig();
+    final OTPStorageFormat format=config.readSettingAsEnum(PwmSetting.OTP_SECRET_STORAGEFORMAT,OTPStorageFormat.class);
+switch (format) {
+case PWM:
+      value=JsonUtil.serialize(otpUserRecord);
+    break;
+case OTPURL:
+  value=OTPUrlUtil.composeOtpUrl(otpUserRecord);
+break;
+case BASE32SECRET:
+value=otpUserRecord.getSecret();
+break;
+case PAM:
+value=OTPPamUtil.composePamData(otpUserRecord);
+break;
+default :
+String errorStr=String.format(""Unsupported storage format: "",format.toString());
+ErrorInformation error=new ErrorInformation(PwmError.ERROR_INVALID_CONFIG,errorStr);
+throw new PwmUnrecoverableException(error);
+}
+}
+return value;
+}
+",compose a single line of otp information .,what,"The method `composeOtpAttribute` takes an OTP user record and returns a string representation of it, depending on the configuration value of the OTP secret storage format.",0.8338223099708557
+58,"public FoxHttpRequestBuilder addRequestQueryEntry(String name, String value) {
+        foxHttpRequest.getRequestQuery().addQueryEntry(name, value);
+        return this;
+    }",add a new query entry,what,"This method is used by a FoxHttpRequestBuilder object to add a new query entry, which is represented by the name and value parameters.",0.8917887806892395
+59,"    public void fromAngleAxis(float angle, fVector3 axis) {
+        fVector3 normAxis = axis.normalize();
+        fromAngleNormalAxis(angle, normAxis);
+    }
+",fromangleaxis sets this matrix4f to the values specified by an angle and an axis of rotation,how-it-is-done,"This code takes an angle and a vector axis, normalizes the axis then calls fromAngleNormalAxis.",0.8649696707725525
+60,"public String timeAgo(final Date date){
+  return timeAgo(date.getTime());
+}
+",get time ago that date occurred,what,The code returns a String for how long ago a date occurred in terms of time.,0.8467100262641907
+61,"	public void leave() {
+		ChatAdministration.getInstance().removeFileFromList(this);
+		
+	} 
+",removes the file from the filelist,what,The method leaves a file from the list of files that are being processed in chat administration by removing it from the list.,0.8910419940948486
+62,"public String undo(){
+  if (!canUndo()) {
+    return """";
+  }
+  UndoAction undoAction=m_undoStack.get(m_nCurrentEditAction);
+  m_bNeedsUndoAction=false;
+  undoAction.undo();
+  m_bNeedsUndoAction=true;
+  m_nCurrentEditAction--;
+  return undoAction.getUndoMsg();
+}
+",undo the last edit action performed on the network .,what,"This method undoes the previous edit action by popping it from the stack, reversing the change and returning the message associated with that action.",0.8631508350372314
+63,"@Override public Segment intersect(long from,long to){
+  long start=Math.max(from,this.segmentStart);
+  long end=Math.min(to,this.segmentEnd);
+  if (start <= end) {
+    return new SegmentRange(start,end);
+  }
+ else {
+    return null;
+  }
+}
+",returns a segment that is the intersection of this segment and the interval .,property,"The method intersects this segment with another one given by parameters from and to, returning null if there is no intersection, otherwise returning the intersection segment",0.8478791117668152
+64,"private static BigDecimal doAdd(final BigDecimal v1, final BigDecimal v2) {
+        BigDecimal total = v1;
+        if (v1 != null && v2 != null) {
+            total = v1.add(v2);
+        } else if (v2 != null) {
+            total = v2;
+        }
+        return total;
+    }",add 2 bigdecimal safely ( i . e . handles nulls as zeros ),noisy,This code adds two BigDecimal v1 and v2.,0.816762388
+65,"public static String getVMStatus(String hostIpPort, String id) throws TargetException {
+
+		if(id.startsWith(""urn:uuid:"")) id = id.substring(9);
+		String status = null;
+		URL url = null;
+		try {
+			CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+			url = new URL(""http://"" + hostIpPort + ""/compute/"" + id);
+		} catch (MalformedURLException e) {
+			throw new TargetException(e);
+		}
+
+		HttpURLConnection httpURLConnection = null;
+		DataInputStream in = null;
+		try {
+			httpURLConnection = (HttpURLConnection) url.openConnection();
+			httpURLConnection.setRequestMethod(""GET"");
+			httpURLConnection.setRequestProperty(""Accept"", ""application/json"");
+
+			in = new DataInputStream(httpURLConnection.getInputStream());
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Utils.copyStreamSafely(in, out);
+
+			// Parse JSON response to extract VM status
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonResponse rsp = objectMapper.readValue(out.toString( ""UTF-8"" ), JsonResponse.class);
+			status = rsp.getState();
+
+		} catch (IOException e) {
+			throw new TargetException(e);
+
+		}  finally {
+			Utils.closeQuietly(in);
+			if (httpURLConnection != null) {
+				httpURLConnection.disconnect();
+			}
+		}
+
+		return status;
+	}",retrieves vm status ( tested on ca only ) .,how-to-use,Getting VM Status using Java and HttpURLConnection.,0.8481613397598267
+66,"	public int getSequenceNumber() {
+		if (sequenceNumber == null)
+			return Integer.MAX_VALUE;
+  
+		return sequenceNumber.getValue();
+	}
+",returns the flaps sequence number,property,"Returns the sequence number, if not null; else returns Integer.MAX_VALUE.",0.8712759017944336
+67,"public String buildSelectDeleteFileMode(String htmlAttributes) {
+
+        List<String> options = new ArrayList<String>(2);
+        options.add(key(Messages.GUI_PREF_PRESERVE_SIBLINGS_0));
+        options.add(key(Messages.GUI_PREF_DELETE_SIBLINGS_0));
+        List<String> values = new ArrayList<String>(2);
+        values.add(String.valueOf(CmsResource.DELETE_PRESERVE_SIBLINGS));
+        values.add(String.valueOf(CmsResource.DELETE_REMOVE_SIBLINGS));
+        int selectedIndex = values.indexOf(getParamTabDiDeleteFileMode());
+        return buildSelect(htmlAttributes, options, values, selectedIndex);
+    }",builds the html for the default delete file mode select box .,why,The code snippet creates a drop-down menu that allows users to choose whether sibling resources should be deleted or preserved during file deletion.,0.8682747483253479
+68,"public static AccessibilityNodeInfoCompat searchFocus(TraversalStrategy traversal,AccessibilityNodeInfoCompat currentFocus,int direction,NodeFilter filter){
+  if (traversal == null || currentFocus == null) {
+    return null;
+  }
+  if (filter == null) {
+    filter=DEFAULT_FILTER;
+  }
+  AccessibilityNodeInfoCompat targetNode=AccessibilityNodeInfoCompat.obtain(currentFocus);
+  Set<AccessibilityNodeInfoCompat> seenNodes=new HashSet<>();
+  try {
+    do {
+      seenNodes.add(targetNode);
+      targetNode=traversal.findFocus(targetNode,direction);
+      if (seenNodes.contains(targetNode)) {
+        LogUtils.log(AccessibilityNodeInfoUtils.class,Log.ERROR,""Found duplicate during traversal: %s"",targetNode.getInfo());
+        return null;
+      }
+    }
+ while (targetNode != null && !filter.accept(targetNode));
+  }
+  finally {
+    AccessibilityNodeInfoUtils.recycleNodes(seenNodes);
+  }
+  return targetNode;
+}
+",search focus that satisfied specified node filter from currentfocus to specified direction according to ordertraversal strategy,how-it-is-done,"This code searches for a focus in a given traversal direction, starting from a given node, and returns the first node that matches a given filter. It does this by using a traversal strategy to find the next node in the desired direction, and then checking if the current node is accepted by the filter. If it is not, then the function continues searching until a node that passes the filter is found or no more nodes are available. The function returns null if a duplicate node is found during the search process.",0.8289092183113098
+69,"public static Integer findLimit(Map<String,String> operatorProperties) throws PlanGenException {
+  String limitStr=getOptionalProperty(LIMIT,operatorProperties);
+  if (limitStr == null) {
+    return null;
+  }
+  Integer limit=Integer.parseInt(limitStr);
+  if (limit < 0) {
+    throw new PlanGenException(""Limit must be equal to or greater than 0"");
+  }
+  return limit;
+}
+","this function finds the "" limit "" value in the operator ' s properties .",what,"The code snippet is trying to parse a limit from a map of operator properties and returns null if it doesn't exist, throws an exception if the limit is invalid, and returns the parsed value otherwise.",0.8578999042510986
+70,"public static boolean isFullCopyDetached(Volume volume,DbClient dbClient){
+  boolean result=false;
+  String replicaState=volume.getReplicaState();
+  if (!isVolumeFullCopy(volume,dbClient) && replicaState != null && !replicaState.isEmpty()) {
+    ReplicationState state=ReplicationState.getEnumValue(replicaState);
+    if (state != null && state == ReplicationState.DETACHED) {
+      result=true;
+    }
+  }
+  return result;
+}
+",check if the full copy is detached .,what,This method checks if a volume is a full copy and detached.,0.9112609624862671
+71,"public static final String decode(String s,String enc) throws MalformedURLException, UnsupportedEncodingException {
+  try {
+    return URLDecoder.decode(s,enc);
+  }
+ catch (  IllegalArgumentException iae) {
+    MalformedURLException mue=new MalformedURLException(""Invalid URI encoding: "" + s);
+    mue.initCause(iae);
+    throw mue;
+  }
+}
+",decode a uri string ( according to rfc 2396 ) .,how-it-is-done,This method returns a decoded string using the URLDecoder class and throws MalformedURLExceptions with IllegalArgumentException causes if it encounters an invalid URI encoding.,0.8205119371414185
+72,"  public void setNumFolds(int numFolds) {
+
+    if (numFolds < 0) {
+      throw new IllegalArgumentException(""Number of folds has to be positive or zero."");
+    }
+    m_NumFolds = numFolds;
+  }
+",sets the number of folds the dataset is split into,what,"Sets a positive integer value to m_NumFolds, otherwise throws an IllegalArgumentException if it is negative.",0.826387346
+73,"public static void main(String args[]) {
+        Statement stmts[] = null;
+        try {
+            stmts = getStatements(args[0]);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        for (Statement s : stmts) {
+            System.out.print(s.statement);
+        }
+    }",run the parser as a stand - alone tool sending output to standard out .,what,// Reads and prints the statements from a text file based on its name in args[0].,0.8173226714134216
+74,"private void doWarmStartIfNotNull(Object warmSolution) throws FailedToFitException
+    {
+        if(warmSolution != null )
+        {
+            if(warmSolution instanceof SimpleWeightVectorModel)
+            {
+                SimpleWeightVectorModel warm = (SimpleWeightVectorModel) warmSolution;
+                if(warm.numWeightsVecs() != ws.length)
+                    throw new FailedToFitException(""Warm solution has "" + warm.numWeightsVecs() + "" weight vectors instead of "" + ws.length);
+                for(int i = 0; i < ws.length; i++)
+                {
+                    warm.getRawWeight(i).copyTo(ws[i]);
+                    if(useBiasTerm)
+                        bs[i] = warm.getBias(i);
+                }
+            }
+            else
+                throw new FailedToFitException(""Can not warm warm from "" + warmSolution.getClass().getCanonicalName());
+        }
+    }",performs a warm start if the given object is of the appropriate class .,what,"private void doWarmStartIfNotNull(Object warmSolution) throws FailedToFitException, checks whether a given object is an instance of SimpleWeightVectorModel and copies its weight vectors into the current model's parameters if it is.",0.8588255047798157
+75,"@GET
+    @Path(""/enumdef/guid/{guid}"")
+    @Produces(Servlets.JSON_MEDIA_TYPE)
+    public AtlasEnumDef getEnumDefByGuid(@PathParam(""guid"") String guid) throws AtlasBaseException {
+        AtlasEnumDef ret = typeDefStore.getEnumDefByGuid(guid);
+
+        return ret;
+    }",get the enum definition for the given guid,why,This method retrieves an enum definition using a GUID.,0.8933302164077759
+76,"	   public void removeGestureHandler(MultimodalGestureHandler gestureHandler) {
+	      gestureHandlers.remove(gestureHandler);
+	   } // removeGestureHandler
+",removes a gesture handler from the recogniser,what,public void removeGestureHandler(MultimodalGestureHandler gestureHandler) {,0.8126106262207031
+77,"     public void setLegajoCa83AntigAnt(int newValue) throws DataStoreException {
+          setInt(LEGAJO_CA_83_ANTIG_ANT, newValue);
+     }
+",set the value of the legajo ca 83 antig ant column for the current row,what,Sets the value of LEGAJO_CA_83_ANTIG_ANT data store using setInt method.,0.8557225465774536
+78,"private void validateExplicitHashKey(final String explicitHashKey){
+  if (explicitHashKey == null) {
+    return;
+  }
+  BigInteger b=null;
+  try {
+    b=new BigInteger(explicitHashKey);
+    if (b.compareTo(UINT_128_MAX) > 0 || b.compareTo(BigInteger.ZERO) < 0) {
+      throw new IllegalArgumentException(""Invalid explicitHashKey, must be greater or equal to zero and less than or equal to (2^128 - 1), got "" + explicitHashKey);
+    }
+  }
+ catch (  NumberFormatException e) {
+    throw new IllegalArgumentException(""Invalid explicitHashKey, must be an integer, got "" + explicitHashKey);
+  }
+}
+",validate the explicit hash key of an input kinesis user record .,what,"This method validates the explicit hash key, which is a String that must be an integer between 0 and (2^128 - 1) if it is non-null.",0.8430572748184204
+79,"public MethodHandleConstant addMethodHandle(MethodHandleType mhType,
+                                              ConstantPoolEntry cpEntry)
+  {
+    MethodHandleConstant entry = getMethodHandle(mhType, cpEntry);
+
+    if (entry != null) {
+      return entry;
+    }
+
+    entry = new MethodHandleConstant(this, _entries.size(), mhType, cpEntry);
+
+    addConstant(entry);
+
+    return entry;
+  }",adds a method ref constant .,what,This method adds a new MethodHandleConstant object to the constant pool and returns it.,0.8708702325820923
+80,"public static Object withInputStream(Path self, @ClosureParams(value = SimpleType.class, options = ""java.io.InputStream"") Closure closure) throws IOException {
+        return IOGroovyMethods.withStream(newInputStream(self), closure);
+    }",create a new inputstream for this file and passes it into the closure .,how-it-is-done,"This code defines a method called withInputStream that opens an input stream for a given Path and executes a closure that accepts an InputStream object as a parameter. The method returns the value returned by the closure, which could be any object.",0.8643808960914612
+81,"static private byte[] classToBytes(Class c){
+  return classNameToBytes(c.getName());
+}
+",returns the bytes used to represent a class in an oplog .,how-to-use,static private byte[] classToBytes(Class c) {,0.8044235110282898
+82,"public void setupMIC ( byte[] type1, byte[] type2 ) throws GeneralSecurityException, IOException {
+        byte[] sk = this.masterKey;
+        if ( sk == null ) {
+            return;
+        }
+        MessageDigest mac = Crypto.getHMACT64(sk);
+        mac.update(type1);
+        mac.update(type2);
+        byte[] type3 = toByteArray();
+        mac.update(type3);
+        setMic(mac.digest());
+    }",sets the mic,noisy,"Noisy: Sets up MIC by hashing master key, type1, and type2 with HMACT64",0.8202532529830933
+83,"public void stopStartedContainers(boolean keepContainer,
+                                      boolean removeVolumes,
+                                      boolean removeCustomNetworks,
+                                      GavLabel gavLabel)
+        throws DockerAccessException, ExecException {
+        Set<Network> networksToRemove = new HashSet<>();
+        for (ContainerTracker.ContainerShutdownDescriptor descriptor : tracker.removeShutdownDescriptors(gavLabel)) {
+            collectCustomNetworks(networksToRemove, descriptor, removeCustomNetworks);
+            shutdown(descriptor, keepContainer, removeVolumes);
+        }
+        removeCustomNetworks(networksToRemove);
+    }",stop all registered container,what,"This code method takes in a GavLabel, removes all containers, networks, and volumes associated with it, except for those that have been configured to be kept, and then shuts down any remaining containers.",0.8311362862586975
+84,"public JsStatement setDate(DateOption dateOption)
+	{
+		return new JsQuery(this).$().chain(""datepicker"", ""'setDate'"",
+			dateOption != null ? dateOption.getJavascriptOption() : null);
+	}",method to set the date of the datepicker,why,This sets a Datepicker with an option for the date.,0.9273463487625122
+85,"    public double evaluate(double x, double epsilon) throws MathException {
+        return evaluate(x, epsilon, Integer.MAX_VALUE);
+    }
+",evaluates the continued fraction at the value x,what,The code snippet provides a method named evaluate that calls another version of itself with a more permissive argument.,0.8362637162208557
+86,"public RecursiveZipHandler(List<String> subResourceNames,String collectionName,DeltaHandler<ResourceNode> parentHandler){
+  this.parentHandler=parentHandler;
+  this.collectionName=collectionName;
+  processCount=new AtomicInteger(subResourceNames.size());
+  nodes=new ArrayList<>();
+  xDeltaResponseNumber=new AtomicInteger(0);
+}
+",creates an new instance of the recursiveziphandler .,what,"The RecursiveZipHandler class contains a constructor that initializes member variables for processing a list of subresource names, a collection name, and a parent handler for delta responses.",0.8428474068641663
+87,"	final private void addShapeNodeToScene(GL20Node node) {
+		GL20ResourceShape shapeResource = (GL20ResourceShape)node.getResource();
+
+		if (shapeResource.getResourceClassType() != GL20Resource.GL20RESOURCE_SHAPE_LINE_STRIP)
+			opaqueShaderNodes.add(node);
+		else
+			lineStripNodes.add(node);
+			
+		if (node.getSelectionState() != 0)
+			selectedNodes.add(node);
+	}
+",add a gl20node with a gl20resourceshape resource to the scene,how-it-is-done,"In this method, we check if a given node is of type GL20RESOURCE_SHAPE_LINE_STRIP by comparing it with GL20ResourceShape's resourceClassType. If so, we add the node to a list called lineStripNodes. In the second if statement, we check if the given node is selected (i.e., has non-zero selection state) and, if so, add it to a list of selected nodes.",0.843004584
+88,"@SuppressWarnings({""unchecked""}) public FinalizableReferenceQueue(){
+  ReferenceQueue<Object> queue;
+  boolean threadStarted=false;
+  try {
+    queue=(ReferenceQueue<Object>)startFinalizer.invoke(null,FinalizableReference.class,this);
+    threadStarted=true;
+  }
+ catch (  IllegalAccessException e) {
+    throw new AssertionError(e);
+  }
+catch (  Throwable t) {
+    logger.log(Level.INFO,""Failed to start reference finalizer thread."" + "" Reference cleanup will only occur when new references are"" + "" created."",t);
+    queue=new ReferenceQueue<Object>();
+  }
+  this.queue=queue;
+  this.threadStarted=threadStarted;
+}
+",constructs a new queue .,what,The FinalizableReferenceQueue is a class that constructs a ReferenceQueue and starts a reference finalizer thread.,0.8408312201499939
+89,"public static <T,U extends InputStream>T withStream(U stream,@ClosureParams(value=FirstParam.class) Closure<T> closure) throws IOException {
+  try {
+    T result=closure.call(stream);
+    InputStream temp=stream;
+    stream=null;
+    temp.close();
+    return result;
+  }
+  finally {
+    closeWithWarning(stream);
+  }
+}
+","allows this input stream to be used within the closure , ensuring that it is flushed and closed before this method returns .",why,"This code snippet defines a method called withStream that takes in an object of type InputStream, and returns an object of type T after applying a closure function on it.",0.8515992760658264
+90,"    public void run(WorkData data) {
+        try {
+            Item item = (Item) data.getAttribute(""item"");
+            if (item == null) {
+                logger.warn(""item is null on command "" + getName());
+                return;
+            }
+            DbQuery query = DbManager.getInstance().createQuery(getApplication().getProperty(""items-table"") + ""_comments"");
+            query.addAndPredicate(""item_id"", item.getId(), DbQuery.EQUALS);
+            List comments =DbManager.getInstance().select(query);
+            data.setAttribute(""comments"",comments);
+        } catch (Exception e) {
+            logger.error(""cannot execute commnad "" + getName(), e);
+        }
+
+    }
+",main processing method for the abstractcommand object,why,public void run(WorkData data) { ,0.7982481122016907
+91,"public static boolean implementsZeroArgMethod(ClassNode classNode,String methodName){
+  return implementsMethod(classNode,methodName,new Class[0]);
+}
+",tests whether the clasnode implements the specified method name,what,"This code checks if a class implements a zero-argument method called ""methodName"".",0.8816168308258057
+92,"	public boolean isManyToMany(AbstractType from, AbstractType to) {
+		return isRelatedBy(from, to, Association.ManyToMany);
+	}
+",returns true if the association between the two entities is many to many,property,"public boolean isManyToMany(AbstractType from, AbstractType to) { // Check if the types are related by a ManyToMany association",0.8353940844535828
+93,"  public void resetGUI(){
+	 stateLabel = null;
+  }
+",will set statelabel to null,what,Resetting the user interface by nulling the stateLabel variable.,0.8839917778968811
+94,"@NotNull public static String normalize(@NotNull String path){
+  int start=0;
+  boolean separator=false;
+  if (SystemInfo.isWindows) {
+    if (path.startsWith(""//"")) {
+      start=2;
+      separator=true;
+    }
+ else     if (path.startsWith(""\\\\"")) {
+      return normalizeTail(0,path,false);
+    }
+  }
+  for (int i=start; i < path.length(); ++i) {
+    final char c=path.charAt(i);
+    if (c == '/') {
+      if (separator) {
+        return normalizeTail(i,path,true);
+      }
+      separator=true;
+    }
+ else     if (c == '\\') {
+      return normalizeTail(i,path,separator);
+    }
+ else {
+      separator=false;
+    }
+  }
+  return path;
+}
+","converts back slashes to forward slashes removes double slashes inside the path , e . g . "" x / y / / z "" = > "" x / y / z """,noisy,"""Normalizes a file path by removing duplicate slashes and converting all slashes to forward slashes.""",0.8483823537826538
+95,"        public void show() {
+            refresh();
+            mujmail.getDisplay().setCurrent( this);
+        }
+",shows the clear database form,what,This code refreshes the screen and makes it display this page.,0.8424191474914551
+96,"public V put(K key,V value){
+  m_keys.add(key);
+  m_values.add(value);
+  return null;
+}
+",put key & value,noisy,"This code snippet is ineffective and incorrect because it returns null, which doesn't actually put anything into the Map.",0.8206822872161865
+97,"public V get(Map<?, V> map){
+		for (Object k : keys){
+			V v = map.get(k);
+			if (v != null){
+				return v;
+			}
+		}
+		return null;
+	}",get the first matching value in the map .,what,"Returns a value from the map if it exists, otherwise returns null",0.8725690245628357
+98,"private void obtainButtonBarBackground() {
+        try {
+            setButtonBarBackgroundColor(ThemeUtil.getColor(this, R.attr.buttonBarBackground));
+        } catch (NotFoundException e) {
+            int resourceId = ThemeUtil.getResId(this, R.attr.buttonBarBackground, -1);
+
+            if (resourceId != -1) {
+                setButtonBarBackground(resourceId);
+            } else {
+                setButtonBarBackground(null);
+            }
+        }
+    }",obtains the background of the button bar from the activity ' s theme .,what,The private method obtainButtonBarBackground() is used in this class to retrieve a resource from ThemeUtil.,0.8670473098754883
+99,"	public void reset() {
+
+		boolean wasTimerRunning = false;
+
+		// Timer running?
+		if (this.timer != null) {
+
+			wasTimerRunning = true;
+
+			// Stop the timer.
+			stop();
+		}
+
+		// Reset remaining timer delay to initial value.
+		this.remainingDelayMillis = this.delayMillis;
+
+		// Was timer running?
+		if (wasTimerRunning) {
+
+			// Restart the timer.
+			start();
+		}
+	}
+",reset the timer,what,"Resetting the timer, setting it to a known initial value of delayMillis milliseconds if it was previously running; then resetting the remainingTimerDelay variable.",0.8635613322257996
+100,"    public String getName () {
+        return document_name;
+    }
+",retrieve the name property,what,This method returns the name of the document.,0.8742469549179077
+101,"	private JLabel getJlFirstName() {
+		if(jlFirstName == null) {
+			jlFirstName = new JLabel(""First name:"");
+		}
+
+		return jlFirstName;
+	}
+",get the first name label,what,"This method returns a label with text ""First name:"" if it hasn't been created before",0.8570932149887085
+102,"public static long[] preprocessSpooky4(final BitVector bv,final long seed){
+  final long length=bv.length();
+  if (length < Long.SIZE * 2)   return null;
+  final long[] state=new long[4 * (int)(length + Long.SIZE * 2) / (4 * Long.SIZE)];
+  long h0, h1, h2, h3;
+  h0=seed;
+  h1=seed;
+  h2=ARBITRARY_BITS;
+  h3=ARBITRARY_BITS;
+  long remaining=length;
+  long pos=0;
+  int p=0;
+  for (; ; ) {
+    h2+=bv.getLong(pos + 0 * Long.SIZE,pos + 1 * Long.SIZE);
+    h3+=bv.getLong(pos + 1 * Long.SIZE,pos + 2 * Long.SIZE);
+    h2=Long.rotateLeft(h2,50);
+    h2+=h3;
+    h0^=h2;
+    h3=Long.rotateLeft(h3,52);
+    h3+=h0;
+    h1^=h3;
+    h0=Long.rotateLeft(h0,30);
+    h0+=h1;
+    h2^=h0;
+    h1=Long.rotateLeft(h1,41);
+    h1+=h2;
+    h3^=h1;
+    h2=Long.rotateLeft(h2,54);
+    h2+=h3;
+    h0^=h2;
+    h3=Long.rotateLeft(h3,48);
+    h3+=h0;
+    h1^=h3;
+    h0=Long.rotateLeft(h0,38);
+    h0+=h1;
+    h2^=h0;
+    h1=Long.rotateLeft(h1,37);
+    h1+=h2;
+    h3^=h1;
+    h2=Long.rotateLeft(h2,62);
+    h2+=h3;
+    h0^=h2;
+    h3=Long.rotateLeft(h3,34);
+    h3+=h0;
+    h1^=h3;
+    h0=Long.rotateLeft(h0,5);
+    h0+=h1;
+    h2^=h0;
+    h1=Long.rotateLeft(h1,36);
+    h1+=h2;
+    h3^=h1;
+    state[p + 0]=h0;
+    state[p + 1]=h1;
+    state[p + 2]=h2;
+    state[p + 3]=h3;
+    p+=4;
+    if (remaining >= Long.SIZE * 6) {
+      h0+=bv.getLong(pos + 2 * Long.SIZE,pos + 3 * Long.SIZE);
+      h1+=bv.getLong(pos + 3 * Long.SIZE,pos + 4 * Long.SIZE);
+      remaining-=4 * Long.SIZE;
+      pos+=4 * Long.SIZE;
+    }
+ else     return state;
+  }
+}
+",preprocesses a bit vector so that spookyhash 4 - word - state can be computed in constant time on all prefixes .,why,"The preprocessSpooky4 method processes a BitVector bv to produce a long array, state[], that is used in SpookyHash algorithm. This method uses two variables h0 and h1 to store initial values of seed, and h2 and h3 to represent arbitrary bits. The method performs 4 rounds of processing for each of the 8-bit blocks in the BitVector bv, with each round using a combination of rotations and bitwise operations to mix the data. After all blocks have been processed, the final values of h0, h1, h2, and h3 are stored in state[].",0.8347228765487671
+103,"    public void print(String destDir, String lineSeparator) {
+
+        String name = getLocalName();
+
+        //-- open output file
+        String filename = getFilename(destDir);
+
+        File file = new File(filename);
+        JSourceWriter jsw = null;
+        try {
+            jsw = new JSourceWriter(new FileWriter(file));
+        }
+        catch(java.io.IOException ioe) {
+            System.out.println(""unable to create class file: "" + filename);
+            return;
+        }
+        if (lineSeparator == null) {
+            lineSeparator = System.getProperty(""line.separator"");
+        }
+        jsw.setLineSeparator(lineSeparator);
+        print(jsw);
+        jsw.close();
+        
+    } //-- print
+",prints the source code for this jstructure to the destination directory,what,The print method creates a file and writes the content of it in the given directory with the name provided.,0.8576691746711731
+104,"protected static ISREInstall getSREInstallFor(ILaunchConfiguration configuration,
+			ILaunchConfigurationAccessor configAccessor,
+			IJavaProjectAccessor projectAccessor) throws CoreException {
+		assert configAccessor != null;
+		assert projectAccessor != null;
+		final ISREInstall sre;
+		if (configAccessor.getUseProjectSREFlag(configuration)) {
+			sre = getProjectSpecificSRE(configuration, true, projectAccessor);
+		} else if (configAccessor.getUseSystemSREFlag(configuration)) {
+			sre = SARLRuntime.getDefaultSREInstall();
+			verifySREValidity(sre, sre.getId());
+		} else  {
+			final String runtime = configAccessor.getSREId(configuration);
+			sre = SARLRuntime.getSREFromId(runtime);
+			verifySREValidity(sre, runtime);
+		}
+
+		if (sre == null) {
+			throw new CoreException(SARLEclipsePlugin.getDefault().createStatus(IStatus.ERROR,
+					Messages.SARLLaunchConfigurationDelegate_0));
+		}
+
+		return sre;
+	}",replies the sre installation to be used for the given configuration .,why,"This method retrieves the SRE installation for a given launch configuration by considering the project specific flag, system SRE flag and SRE ID. It verifies that the returned SRE is valid and throws an exception if it's null.",0.8562802076339722
+105,"	public void subtractTimeUnits(int timeUnits) {
+		AppContext.getDataManager().markForUpdate(this);
+		this.timeUnits -= timeUnits;
+	}
+",subtracts timeunits from the unit timeunits,what,"The method ""subtractTimeUnits"" marks an object for update and subtracts the specified number of time units from its current value.",0.836055577
+106,"    public Walker at(String state) {
+        if (!getProcessInstance().isActive(state)) {
+            throw new RuntimeException(""State '"" + state + ""' not reached."");
+        }
+        return this;
+    }
+",checks if the walker is at the specified state,what,"The method ""at"" returns this object if the state passed as an argument is currently active in the process instance.",0.8791864514350891
+107,"	protected void addValuePropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString(""_UI_RandomListType_value_feature""),
+				 getString(""_UI_PropertyDescriptor_description"", ""_UI_RandomListType_value_feature"", ""_UI_RandomListType_type""),
+				 Schema1Package.eINSTANCE.getRandomListType_Value(),
+				 true,
+				 ItemPropertyDescriptor.REAL_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+",this adds a property descriptor for the value feature,why,"This method is adding a property descriptor for the value feature of an element that represents a random list type. The description of the property descriptor includes information about the feature, the data type, and whether it's a real value image or not.",0.8973809480667114
+108,"	public void startServing() {
+		log.trace(""start serving"");
+		// notify all clients that serving started
+		myServer.startServing(intCurrentPageNum, intPageNum, strSplitedFileDir,
+				strPdfFileName);
+	}
+",map start serving method to gui components,why,"The code snippet logs a trace message that serving has started, and then calls startServing on the myServer object, passing in several arguments including the current page number, the total page count, the directory where the splited file is stored, and the name of the PDF file.",0.8378952145576477
+109,"void append(@NonNull Node<E> first, @NonNull Node<E> last) {
+    for (;;) {
+      Node<E> t = tail;
+      if (casTail(t, last)) {
+        t.lazySetNext(first);
+        if (factory == OPTIMISIC) {
+          return;
+        }
+        for (;;) {
+          first.complete();
+          if (first == last) {
+            return;
+          }
+          Node<E> next = first.getNextRelaxed();
+          if (next.value == null) {
+            first.next = null; // reduce nepotism
+          }
+          first = next;
+        }
+      }
+      Node<E> node = transferOrCombine(first, last);
+      if (node == null) {
+        first.await();
+        return;
+      } else if (node != first) {
+        last = node;
+      }
+    }
+  }",adds the linked list of nodes to the queue .,how-it-is-done,The method appends two nodes together by using a CAS loop and reducing nepotism in case of optimistic concurrency.,0.8640496730804443
+110,"        public void error(final TransformerException e) {
+            getListener().error(""xsddoc caused an error: "" + XMLUtil.getLocallizedMessageAndLocation(e));
+        }
+",handler for errors in transformations,why,xsddoc causes an error because it generates a TransformerException.,0.8457487225532532
+111,"public long rangeCount(final boolean exact,final Resource s,final URI p,final Value o,final Resource... c) throws Exception {
+  if (c == null) {
+    throw new IllegalArgumentException();
+  }
+  final UUID uuid=UUID.randomUUID();
+  final ConnectOptions opts=mgr.newQueryConnectOptions(sparqlEndpointURL,uuid,tx);
+  opts.addRequestParam(""ESTCARD"");
+  if (exact) {
+    opts.addRequestParam(""exact"",""true"");
+  }
+  if (s != null) {
+    opts.addRequestParam(""s"",EncodeDecodeValue.encodeValue(s));
+  }
+  if (p != null) {
+    opts.addRequestParam(""p"",EncodeDecodeValue.encodeValue(p));
+  }
+  if (o != null) {
+    opts.addRequestParam(""o"",EncodeDecodeValue.encodeValue(o));
+  }
+  opts.addRequestParam(""c"",EncodeDecodeValue.encodeContexts(c));
+  JettyResponseListener resp=null;
+  try {
+    opts.setAcceptHeader(ConnectOptions.MIME_APPLICATION_XML);
+    checkResponseCode(resp=doConnect(opts));
+    final RangeCountResult result=rangeCountResults(resp);
+    return result.rangeCount;
+  }
+  finally {
+    if (resp != null)     resp.abort();
+  }
+}
+",perform a range count on the statement indices for a given triple ( quad ) pattern .,why,"The code counts how many ranges are available given a set of conditions, such as subject, predicate, and object, as well as contexts. The exact parameter allows for exact matching in the range count query.",0.8522949814796448
+112,"public static Pattern selection(Pattern pattern1, Pattern pattern2)
+   {
+      if (pattern1 == null || pattern2 == null)
+      {
+         throw new IllegalArgumentException(""Neither pattern can be null"");
+      }
+      return new SelectPattern(pattern1, pattern2);
+   }",a pattern which matches pattern1 followed by pattern2 and returns the longer of the two matches .,how-it-is-done,"The provided code returns a new SelectPattern object by merging two other patterns, pattern1 and pattern2, if both are not null; otherwise it throws an IllegalArgumentException stating that neither pattern can be null.",0.8504189848899841
+113,"public boolean isEnabled(LintCategory lc){
+  return values.contains(lc);
+}
+",checks if a warning category is enabled .,what,This method checks if a certain value exists in an array of LintCategories.,0.8552669882774353
+114,"public String consumeAttributeKey(){
+  int start=pos;
+  while (!isEmpty() && (matchesWord() || matchesAny('-','_',':')))   pos++;
+  return queue.substring(start,pos);
+}
+","consume an attribute key off the queue ( letter , digit , - , _ , : "" )",noisy,"The method consumes attribute keys and returns them as strings by matching words, dashes, underscores, or colons until it reaches the end of a queue string.",0.8244518041610718
+115,"    public boolean isSuccessful() {
+        return isProcessingSuccessful;
+    }
+",indicates whether the processing was successful,what,This method checks whether the process was successful.,0.9212269186973572
+116,"public static int[] copyOfRange(int[] original,int start,int end){
+  if (start <= end) {
+    if (original.length >= start && 0 <= start) {
+      int length=end - start;
+      int copyLength=Math.min(length,original.length - start);
+      int[] copy=new int[length];
+      System.arraycopy(original,start,copy,0,copyLength);
+      return copy;
+    }
+    throw new ArrayIndexOutOfBoundsException();
+  }
+  throw new IllegalArgumentException();
+}
+","copies elements in original array to a new array , from index start ( inclusive ) to end ( exclusive ) .",how-it-is-done,"The given code snippet creates a copy of an array with elements from `start` up to but not including `end`. It uses `System.arraycopy()` to copy the elements into a new array, and returns the newly created array. If either the `start` or `end` index is negative or greater than the length of the original array, it throws an `ArrayIndexOutOfBoundsException`; otherwise, it returns the copied array.",0.8363675475120544
+117,"public static String trimSize(String str,int size){
+  if (str == null)   return str;
+  if (size <= 0)   throw new IllegalArgumentException(""Trim size invalid: "" + size);
+  int length=str.length();
+  if (length < size / 2)   return str;
+  try {
+    byte[] bytes=str.getBytes(""UTF-8"");
+    if (bytes.length <= size)     return str;
+    byte[] result=new byte[size];
+    System.arraycopy(bytes,0,result,0,size);
+    return new String(result,""UTF-8"");
+  }
+ catch (  UnsupportedEncodingException e) {
+    log.log(Level.SEVERE,str,e);
+  }
+  return str;
+}
+",trim to max byte size,why,"Trimming a string will return the original string if it is null, less than 0, or shorter than half of trim size.",0.8280324339866638
+118,"  private void storeDefaultBeans() {
+    //the session bean
+    m_WebSession.setAttribute(""jwma.session"", this);
+    //the HtmlHelper bean
+    m_WebSession.setAttribute(""jwma.htmlhelper"", m_HtmlHelper);
+    //a reference to the i18n classloader
+    m_WebSession.setAttribute(""jwma.resourceloader"", JwmaKernel.getReference().getResourceClassLoader());
+  }//storeDefaultBeans
+",stores the default beans of any session,what,private void storeDefaultBeans() {,0.808640182
+119,"	public int logIntoAccount(String username, String passwort) throws ConnectionException{
+		String command = ""do?a=PlayerAction&cmd=logIntoAccount"";
+		String message;
+		String response;
+		int responseCode = 0;
+		
+		JSONStringer json = new JSONStringer();
+		try {
+			json.object();
+			json.key(""nickname"").value(username);
+			json.key(""password"").value(passwort);
+			json.endObject();
+			
+			message = json.toString();
+			System.out.println(json.toString());
+			
+			response = sendToServer(command, message);
+			responseCode = extractResponseCode(response);
+		} catch (Exception e) {
+			throw new ConnectionException(""Fehler beim Einloggen: ""+e.getMessage());
+		}
+		
+		return responseCode;
+	}
+",methode zum einloggen in ein spiel,noisy,"The code has an excessive number of unnecessary and ineffective lines, including JSONStringer's redundant use and print statements. This method should be shortened for easier readability while achieving a similar functionality.",0.7760400176048279
+120,"public BinaryDictionary(Context context,ByteBuffer byteBuffer,int dicTypeId){
+  if (byteBuffer != null) {
+    if (byteBuffer.isDirect()) {
+      mNativeDictDirectBuffer=byteBuffer;
+    }
+ else {
+      mNativeDictDirectBuffer=ByteBuffer.allocateDirect(byteBuffer.capacity());
+      byteBuffer.rewind();
+      mNativeDictDirectBuffer.put(byteBuffer);
+    }
+    mDictLength=byteBuffer.capacity();
+    mNativeDict=openNative(mNativeDictDirectBuffer,TYPED_LETTER_MULTIPLIER,FULL_WORD_FREQ_MULTIPLIER,mDictLength);
+  }
+  mDicTypeId=dicTypeId;
+}
+",create a dictionary from a byte buffer .,what,"This code snippet initializes a BinaryDictionary instance with a given context, ByteBuffer byteBuffer, and int dicTypeId.",0.8556702136993408
+121,"public static boolean floatArrayEquals(float[] x,float[] y,float tol){
+  for (int i=0; i < x.length; i+=1) {
+    if (x[i] == 0) {
+      return y[i] == 0;
+    }
+    if (Math.abs((y[i] - x[i]) / x[i]) > tol) {
+      return false;
+    }
+  }
+  return true;
+}
+",compare two float arrays using a given tolerance,how-it-is-done,"The method floatArrayEquals compares two float arrays element by element within a specified tolerance and returns true if they are equal, false otherwise.",0.8636803030967712
+122,"@Override protected void sendData(final OutputStream out) throws IOException {
+  LOG.trace(""enter sendData(OutputStream out)"");
+  if (lengthOfData() == 0) {
+    LOG.debug(""No data to send."");
+    return;
+  }
+  final byte[] tmp=new byte[4096];
+  final InputStream instream=source.createInputStream();
+  try {
+    int len;
+    while ((len=instream.read(tmp)) >= 0) {
+      out.write(tmp,0,len);
+    }
+  }
+  finally {
+    instream.close();
+  }
+}
+","write the data in "" source "" to the specified stream .",what,This method sends data from an input stream to an output stream using a 4096 byte buffer and closes the input stream upon completion.,0.8565269112586975
+123,"    public ReusableStringBuffer append(String s) {
+	if (s == null) {
+	    s = String.valueOf(s);
+	}
+
+        int newLength = s.length() + length;
+        if(newLength > value.length) {
+            expandCapacity(newLength);
+        }
+
+        s.getChars(0, s.length(), value, length);
+        setLength(newLength);
+
+        return this;
+    }   
+",append the given string to the end of this reusablestringbuffer,what,"This method appends a String to this ReusableStringBuffer, expanding its capacity if necessary.",0.866024911
+124,"	public void delete(Employees entity) {
+		EntityManagerHelper
+				.log(""deleting Employees instance"", Level.INFO, null);
+		try {
+			entity = getEntityManager().getReference(Employees.class,
+					entity.getId());
+			getEntityManager().remove(entity);
+			EntityManagerHelper.log(""delete successful"", Level.INFO, null);
+		} catch (RuntimeException re) {
+			EntityManagerHelper.log(""delete failed"", Level.SEVERE, re);
+			throw re;
+		}
+	}
+",delete a persistent employees entity,what,"The code snippet is a method that deletes an instance of Employees from the database, logging information about the delete operation using the EntityManagerHelper class.",0.8368704319000244
+125,"public MonthDateFormat(Locale locale,int chars){
+  this(TimeZone.getDefault(),locale,chars,true,false);
+}
+",creates a new instance for the specified time zone .,why,"This is a constructor method that creates a new object of this class with a specified locale and number of characters, using the default time zone.",0.8945915102958679
+126,"@Override
+    public ReaderT<W,T,R> peek(final Consumer<? super R> peek) {
+        return of(run.peek(reader -> reader.mapFn(a -> {
+            peek.accept(a);
+            return a;
+        })));
+    }",peek at the current value of the future,what,The peek method takes a consumer parameter and applies it to all elements of the reader object.,0.8497271537780762
+127,"    private void setCertificateToPartner( Partner partner, KeystoreCertificate certificate, int category, int prio){
+        partner.getPartnerCertificateInformationList().insertNewCertificate(certificate.getSerialNumberDEC(), category, prio);
+        this.certificateAccess.storePartnerCertificateInformationList(partner);
+        //display the changes in the certificates for the user in the log
+        this.logger.fine( partner.getPartnerCertificateInformationList().getCertificatePurposeDescription(this.certificateManager, partner, category));
+    }
+",sets a certificate to a partner,what,This method sets a certificate for a partner by inserting it into the partner's list of certificates and storing the list in the local database.,0.8712341785430908
+128,"public void register(Route route){
+  Integer oldSize=Integer.valueOf(_routeHashTable.size());
+  _routeHashTable.put(route.getId(),route);
+  int id=Integer.parseInt(route.getId());
+  if (id > _id) {
+    _id=id;
+  }
+  setDirtyAndFirePropertyChange(LISTLENGTH_CHANGED_PROPERTY,oldSize,Integer.valueOf(_routeHashTable.size()));
+}
+",remember a namedbean object created outside the manager .,what,The method registers a new route object in the HashTable with the associated id as key and route object as value.,0.86021781
+129,"public byte[] decrypt(byte[] data,final String ref,final boolean isEncryption,final String cacheName,final boolean alwaysUseRC4,final boolean isString) throws PdfSecurityException {
+  if (getBooleanValue(PDFflags.IS_FILE_ENCRYPTED) || isEncryption) {
+    BufferedOutputStream streamCache=null;
+    BufferedInputStream bis=null;
+    boolean isAES=false;
+    byte[] AESData=null;
+    if (cacheName != null) {
+      try {
+        if (data == null) {
+          AESData=new byte[16];
+          final FileInputStream fis=new FileInputStream(cacheName);
+          fis.read(AESData);
+          fis.close();
+        }
+        final File tempFile2=File.createTempFile(""jpedal"","".raw"",new File(ObjectStore.temp_dir));
+        cachedObjects.put(tempFile2.getAbsolutePath(),""x"");
+        ObjectStore.copy(cacheName,tempFile2.getAbsolutePath());
+        final File rawFile=new File(cacheName);
+        rawFile.delete();
+        streamCache=new BufferedOutputStream(new FileOutputStream(cacheName));
+        bis=new BufferedInputStream(new FileInputStream(tempFile2));
+      }
+ catch (      final IOException e1) {
+        LogWriter.writeLog(""Exception "" + e1 + "" in decrypt"");
+      }
+    }
+    int keyLength=this.keyLength;
+    String algorithm=""RC4"", keyType=""RC4"";
+    IvParameterSpec ivSpec=null;
+    final PdfObject AESObj;
+    if (!isString) {
+      AESObj=StmFObj;
+    }
+ else {
+      AESObj=StrFObj;
+    }
+    if (certificate != null) {
+      setPasswordFromCertificate(AESObj);
+      AESObj.setIntNumber(PdfDictionary.Length,16);
+    }
+    if (!alwaysUseRC4 && AESObj == null && isAESIdentity) {
+      return data;
+    }
+    if (AESObj != null) {
+      final String cryptName=AESObj.getName(PdfDictionary.CFM);
+      if (cryptName != null && !alwaysUseRC4 && ((cryptName.equals(""AESV2"") || (cryptName.equals(""AESV3""))))) {
+        cipher=null;
+        algorithm=""AES/CBC/PKCS5Padding"";
+        keyType=""AES"";
+        isAES=true;
+        final byte[] iv=new byte[16];
+        if (AESData != null) {
+          System.arraycopy(AESData,0,iv,0,16);
+        }
+ else {
+          System.arraycopy(data,0,iv,0,16);
+        }
+        ivSpec=new IvParameterSpec(iv);
+        if (data == null) {
+          try {
+            bis.skip(16);
+          }
+ catch (          final IOException e) {
+            LogWriter.writeLog(""Exception: "" + e.getMessage());
+          }
+        }
+ else {
+          final int origLen=data.length;
+          final int newLen=origLen - 16;
+          byte[] newData=new byte[newLen];
+          System.arraycopy(data,16,newData,0,newLen);
+          data=newData;
+          final int diff=(data.length & 15);
+          int newLength=data.length;
+          if (diff > 0) {
+            newLength=newLength + 16 - diff;
+            newData=new byte[newLength];
+            System.arraycopy(data,0,newData,0,data.length);
+            data=newData;
+          }
+          if (rev == 5) {
+            try {
+              final byte[] finalKey=new byte[32];
+              System.arraycopy(encryptionKey,0,finalKey,0,finalKey.length);
+              return decodeAES(finalKey,data,iv);
+            }
+ catch (            final Exception e) {
+              throw new PdfSecurityException(""Exception "" + e + "" decrypting content in AES revision 5"");
+            }
+          }
+        }
+      }
+    }
+    byte[] currentKey=new byte[keyLength];
+    if (!ref.isEmpty()) {
+      currentKey=new byte[keyLength + 5];
+    }
+    System.arraycopy(encryptionKey,0,currentKey,0,keyLength);
+    try {
+      final byte[] finalKey;
+      if (rev == 5) {
+        finalKey=new byte[32];
+        System.arraycopy(currentKey,0,finalKey,0,finalKey.length);
+      }
+ else {
+        if (!ref.isEmpty()) {
+          final int pointer=ref.indexOf(' ');
+          final int pointer2=ref.indexOf(' ',pointer + 1);
+          final int obj=Integer.parseInt(ref.substring(0,pointer));
+          final int gen=Integer.parseInt(ref.substring(pointer + 1,pointer2));
+          currentKey[keyLength]=((byte)(obj & 0xff));
+          currentKey[keyLength + 1]=((byte)((obj >> 8) & 0xff));
+          currentKey[keyLength + 2]=((byte)((obj >> 16) & 0xff));
+          currentKey[keyLength + 3]=((byte)(gen & 0xff));
+          currentKey[keyLength + 4]=((byte)((gen >> 8) & 0xff));
+        }
+        finalKey=new byte[Math.min(currentKey.length,16)];
+        if (!ref.isEmpty()) {
+          final MessageDigest currentDigest=MessageDigest.getInstance(""MD5"");
+          currentDigest.update(currentKey);
+          if (isAES && keyLength >= 16) {
+            final byte[] salt={(byte)0x73,(byte)0x41,(byte)0x6c,(byte)0x54};
+            currentDigest.update(salt);
+          }
+          System.arraycopy(currentDigest.digest(),0,finalKey,0,finalKey.length);
+        }
+ else {
+          System.arraycopy(currentKey,0,finalKey,0,finalKey.length);
+        }
+      }
+      if (cipher == null) {
+        cipher=Cipher.getInstance(algorithm);
+      }
+      final SecretKey testKey=new SecretKeySpec(finalKey,keyType);
+      if (isEncryption) {
+        cipher.init(Cipher.ENCRYPT_MODE,testKey);
+      }
+ else {
+        if (ivSpec == null) {
+          cipher.init(Cipher.DECRYPT_MODE,testKey);
+        }
+ else {
+          cipher.init(Cipher.DECRYPT_MODE,testKey,ivSpec);
+        }
+      }
+      if (streamCache != null) {
+        final CipherInputStream cis=new CipherInputStream(bis,cipher);
+        int nextByte;
+        while (true) {
+          nextByte=cis.read();
+          if (nextByte == -1) {
+            break;
+          }
+          streamCache.write(nextByte);
+        }
+        cis.close();
+        streamCache.close();
+        bis.close();
+      }
+      if (data != null) {
+        data=cipher.doFinal(data);
+      }
+    }
+ catch (    final Exception e) {
+      throw new PdfSecurityException(""Exception "" + e + "" decrypting content"");
+    }
+  }
+  if (alwaysReinitCipher) {
+    cipher=null;
+  }
+  return data;
+}
+",reads the line / s from file which make up an object includes move,noisy,"This method decrypts a byte array using AES encryption with a 128-bit key. It takes in an optional reference string, boolean encryption flag, and boolean cache flag as parameters. The method first checks if the data is null and creates an empty byte array of length 16, which is then filled by reading from the cache file specified by the input cacheName parameter. Then it makes a copy of the raw file (the encrypted PDF) to a new temporary file, deletes the original raw file, and sets up a buffered output stream and input stream for encrypting the data. It sets up an instance variable called cipher based on the input encryption flag and key length. Finally, it decrypts the input data using AES encryption with the specified key length and returns the encrypted data.",0.7995653748512268
+130,"private void getOffset(long time, boolean local, int NonExistingTimeOpt, int DuplicatedTimeOpt, int[] offsets) {
+        complete();
+        TimeZoneRule rule = null;
+        if (historicTransitions == null) {
+            rule = initialRule;
+        } else {
+            long tstart = getTransitionTime(historicTransitions.get(0),
+                    local, NonExistingTimeOpt, DuplicatedTimeOpt);
+            if (time < tstart) {
+                rule = initialRule;
+            } else {
+                int idx = historicTransitions.size() - 1;
+                long tend = getTransitionTime(historicTransitions.get(idx),
+                        local, NonExistingTimeOpt, DuplicatedTimeOpt);
+                if (time > tend) {
+                    if (finalRules != null) {
+                        rule = findRuleInFinal(time, local, NonExistingTimeOpt, DuplicatedTimeOpt);
+                    }
+                    if (rule == null) {
+                        // no final rules or the given time is before the first transition
+                        // specified by the final rules -> use the last rule
+                        rule = (historicTransitions.get(idx)).getTo();
+                    }
+                } else {
+                    // Find a historical transition
+                    while (idx >= 0) {
+                        if (time >= getTransitionTime(historicTransitions.get(idx),
+                                local, NonExistingTimeOpt, DuplicatedTimeOpt)) {
+                            break;
+                        }
+                        idx--;
+                    }
+                    rule = (historicTransitions.get(idx)).getTo();
+                }
+            }
+        }
+        offsets[0] = rule.getRawOffset();
+        offsets[1] = rule.getDSTSavings();
+    }",getoffset internal implementation,noisy,"The code snippet is responsible for retrieving the offset for a given time based on historical transitions of a TimeZoneRule object. It does this by checking if the time is before or after any specific transition, and then determining the appropriate offset based on that information.",0.8163501024246216
+131,"public void queueEvent(KeenProject project, String eventCollection, Map<String, Object> event,
+                           Map<String, Object> keenProperties, final KeenCallback callback) {
+
+        if (!isActive) {
+            handleLibraryInactive(callback);
+            return;
+        }
+
+        if (project == null && defaultProject == null) {
+            handleFailure(null,
+                          project,
+                          eventCollection,
+                          event,
+                          keenProperties,
+                          new IllegalStateException(
+                                  ""No project specified, but no default project found""));
+            return;
+        }
+        KeenProject useProject = (project == null ? defaultProject : project);
+
+        try {
+            // Build the event
+            Map<String, Object> newEvent =
+                    validateAndBuildEvent(useProject, eventCollection, event, keenProperties);
+
+            // Serialize the event into JSON.
+            StringWriter writer = new StringWriter();
+            jsonHandler.writeJson(writer, newEvent);
+            String jsonEvent = writer.toString();
+            KeenUtils.closeQuietly(writer);
+
+            try {
+                // Save the JSON event out to the event store.
+                Object handle = eventStore.store(useProject.getProjectId(), eventCollection, jsonEvent);
+
+                if (eventStore instanceof KeenAttemptCountingEventStore) {
+                    synchronized (attemptsLock) {
+                        Map<String, Integer> attempts = getAttemptsMap(useProject.getProjectId(), eventCollection);
+                        attempts.put("""" + handle.hashCode(), maxAttempts);
+                        setAttemptsMap(useProject.getProjectId(), eventCollection, attempts);
+                    }
+                }
+            } catch(IOException ex) {
+                KeenLogging.log(""Failed to set the event POST attempt count. The event was still "" +
+                        ""queued and will we POSTed."");
+            }
+            handleSuccess(callback, project, eventCollection, event, keenProperties);
+        } catch (Exception e) {
+            handleFailure(callback, project, eventCollection, event, keenProperties, e);
+        }
+    }",synchronously queues an event for publishing .,why,"This code snippet queues an event in a project on the Keen platform. It checks if the library is active and if a default project exists, it also makes sure that the user has specified a valid project. If any of these conditions fail, it will call a failure handler. ",0.8391313552856445
+132,"public Token match(int tok) throws ParseException {
+  if (Debug.parserDebug) {
+    Debug.println(""match "" + tok);
+  }
+  if (tok > START && tok < END) {
+    if (tok == ID) {
+      if (!startsId())       throw new ParseException(buffer + ""\nID expected"",ptr);
+      String id=getNextId();
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=id;
+      this.currentMatch.tokenType=ID;
+    }
+ else     if (tok == SAFE) {
+      if (!startsSafeToken())       throw new ParseException(buffer + ""\nID expected"",ptr);
+      String id=ttokenSafe();
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=id;
+      this.currentMatch.tokenType=SAFE;
+    }
+ else     if (tok == ID_NO_WHITESPACE) {
+      if (!startsIdNoWhiteSpace())       throw new ParseException(buffer + ""\nID no white space expected"",ptr);
+      String id=getNextIdNoWhiteSpace();
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=id;
+      this.currentMatch.tokenType=ID_NO_WHITESPACE;
+    }
+ else {
+      String nexttok=getNextId();
+      Integer cur=currentLexer.get(Utils.toUpperCase(nexttok));
+      if (cur == null || cur.intValue() != tok)       throw new ParseException(buffer + ""\nUnexpected Token : "" + nexttok,ptr);
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=nexttok;
+      this.currentMatch.tokenType=tok;
+    }
+  }
+ else   if (tok > END) {
+    char next=lookAhead(0);
+    if (tok == DIGIT) {
+      if (!isDigit(next))       throw new ParseException(buffer + ""\nExpecting DIGIT"",ptr);
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=String.valueOf(next);
+      this.currentMatch.tokenType=tok;
+      consume(1);
+    }
+ else     if (tok == ALPHA) {
+      if (!isAlpha(next))       throw new ParseException(buffer + ""\nExpecting ALPHA"",ptr);
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=String.valueOf(next);
+      this.currentMatch.tokenType=tok;
+      consume(1);
+    }
+  }
+ else {
+    char ch=(char)tok;
+    char next=lookAhead(0);
+    if (next == ch) {
+      consume(1);
+    }
+ else     throw new ParseException(buffer + ""\nExpecting  >>>"" + ch+ ""<<< got >>>""+ next+ ""<<<"",ptr);
+  }
+  return this.currentMatch;
+}
+",match the given token or throw an exception if no such token can be matched.,property,"This code snippet is a part of the Tokenizer class and returns the next token in the buffer based on the given token type. It checks if the next character in the buffer matches the token type specified, and if so, it consumes the character and returns a new Token object with the matched token value and type. If the token type is not found in the buffer, it throws a ParseException with an error message.",0.8668802976608276
+133,"private static img createImage(String AD_Language,String name,String js_command,boolean enabled,boolean pressed){
+  StringBuffer imgName=new StringBuffer(name);
+  if (!enabled)   imgName.append(""D"");
+ else   if (pressed)   imgName.append(""X"");
+  imgName.append(""16.gif"");
+  img img=new img(WebEnv.getImageDirectory(imgName.toString()),name);
+  if (enabled)   img.setAlt(Msg.getMsg(AD_Language,name));
+  if (!pressed || !enabled)   img.setID(""imgButton"");
+ else   img.setID(""imgButtonPressed"");
+  img.setHeight(16);
+  img.setWidth(16);
+  img.setBorder(0);
+  img.setTitle(name);
+  return img;
+}
+","create image with name , id of button _ name and set p _ command onclick",how-it-is-done,"The createImage method returns a new img object, using the given parameters to determine the image name and ID. It appends ""D"" or ""X"" to the name if it is not enabled or pressed respectively and then adds ""16.gif"". Finally, it sets various attributes such as height, width, border, alt, and title.",0.8261985778808594
+134,"public void add(ClosingAwareWebDriver driver){
+  drivers.add(driver);
+}
+",register webdriver instance that should be terminated at the end of the suite,what,This code adds a WebDriver instance to an existing List of WebDrivers.,0.8909655809402466
+135,"public static Set<Policy> policies(Config config) {
+    BasicSettings settings = new BasicSettings(config);
+    return settings.admission().stream().map(admission ->
+      new SegmentedLruPolicy(admission, config)
+    ).collect(toSet());
+  }",returns all variations of this policy based on the configuration parameters .,property,This method returns a set of policies based on configuration data passed in as an argument.,0.8795766234397888
+136,"public static LongStream zipfian(int items, double constant, int events) {
+    return generate(new ZipfianGenerator(items, constant), events);
+  }","returns a sequence of events where some items are more popular than others , according to a zipfian distribution .",how-it-is-done,"The method returns a LongStream that is generated by the ZipfianGenerator class using the provided items, constant, and events parameters.",0.8427290916442871
+137,"		protected boolean isSourceEditing() {
+			return source;
+		}
+",checks for source editing,why,"This method isSourceEditing returns true if the source attribute of the model object is true; false otherwise, indicating that editing is disabled.",0.8195360898971558
+138,"    public void setLongValue(long value) throws XMLConfigurationException {
+        if (type == null) {
+            throw new XMLConfigurationException(
+                    ""The type has not been initialized"");
+        } else if (XMLConfigurationType.LONG_VALUE == type.getType()) {
+            longValue = value;
+        } else {
+            throw new XMLConfigurationException(
+                    ""The value is not of type [long]."");
+        }
+    }
+",the setter method for the long value,why,"It checks if the XMLConfigurationType is null, and then it checks if the XMLConfigurationType.LONG_VALUE is the same as the current type. Then it assigns longValue with the value variable if both are true.",0.8530974388122559
+139,"protected Buffer checkErrorPacket() throws SQLException {
+  return checkErrorPacket(-1);
+}
+","checks for errors in the reply packet , and if none , returns the reply packet , ready for reading",how-it-is-done,"The method checkErrorPacket() returns a buffer, which is then passed into a method called checkErrorPacket(-1).",0.8386841416358948
+140,"    public void setQueryTimeout(int seconds) throws SQLException {
+        try {
+            if(Trace.isEnabled()) Trace.trace(getId(),seconds);
+            if(seconds<0) {
+                throw Factory.getInvalidValueException(""seconds:""+seconds);
+            }
+            queryTimeout=seconds;
+            queryTimeoutSet=true;
+        } catch(Throwable e) {
+            throw convertThrowable(e);
+        }
+    }
+",sets the current query timeout in seconds,what,This method sets a query timeout for the current connection in seconds.,0.9434942007064819
+141,"    public void setChildren(List<PartitionRule> rules) {
+        if (!rules.isEmpty()) {
+            innerRules.addAll(rules);
+        }
+    }
+",adds the given rules to the list of known sub partition rules,how-it-is-done,"The code snippet adds the rules passed in as a parameter, if any, to an existing list of innerRules that are not empty.",0.8772225975990295
+142,"   protected void setCheckmate (boolean t) {
+      checkmate = t;
+      if (result == null)
+         result = new ChessResult((board.isBlackMove()) 
+	             ? ChessResult.BLACK_WIN
+	             : ChessResult.WHITE_WIN);
+   }
+",sets teh checkmate flag and also sets the result field to a new chessresult if and only if result was null,property,"The setCheckmate property determines if a player has checkmated their opponent by setting the boolean variable checkmate true, and creating a new instance of ChessResult.",0.8638458251953125
+143,"public static Method[] getMethods(Class<?> clazz) {
+        final boolean legacyApproach = isGetMethodsLegacyApproach();
+
+        final List<Method> allMethods = new ArrayList<>();
+        addMethods(allMethods, clazz, legacyApproach);
+
+        return allMethods.toArray(new Method[allMethods.size()]);
+    }","gets all methods of a class , excluding those from object .",how-it-is-done,"The method getMethods() retrieves all methods from a given Class object, including inherited ones, using the legacy approach as defined by isGetMethodsLegacyApproach().",0.8659346103668213
+144,"	public Result evaluate( HttpResponseData httpResponse, Variables variables, long ruleId, java.util.Date scanStartTime ) throws DefinitionEvaluationException, SQLException{
+		Connection connection = null;
+		
+		try{
+			connection = Application.getApplication().getDatabaseConnection(Application.DatabaseAccessType.SCANNER);
+			return evaluate( httpResponse, variables, ruleId, connection, scanStartTime );
+		}
+		catch(NoDatabaseConnectionException e){
+			throw new DefinitionEvaluationException(""Database connection could not be established"", e);
+		}
+		finally{
+			if( connection != null ){
+				connection.close();
+			}
+		}
+		
+	}
+",this method evaluates the given data with this definition,what,"This method evaluates a HttpResponseData object by connecting to the database and then executing the evaluate method on it, using the DatabaseAccessType of SCANNER.",0.8769600987434387
+145,"public TrueTypeFont(int type){
+  this.type=type;
+  tables=Collections.synchronizedSortedMap(new TreeMap<String,Object>());
+}
+",creates a new instance of truetypeparser,what,"This is a constructor for the class TrueTypeFont, which sets the private field 'type' to the input value and initializes a synchronized sorted map (tables) as an instance variable in this class.",0.8394070863723755
+146,"public static String toJavaDateTimeFormat(String strftime) {
+    if (!StringUtils.contains(strftime, '%')) {
+      return replaceL(strftime);
+    }
+
+    StringBuilder result = new StringBuilder();
+
+    for (int i = 0; i < strftime.length(); i++) {
+      char c = strftime.charAt(i);
+      if (c == '%') {
+        c = strftime.charAt(++i);
+        boolean stripLeadingZero = false;
+
+        if (c == '-') {
+          stripLeadingZero = true;
+          c = strftime.charAt(++i);
+        }
+
+        if (stripLeadingZero) {
+          result.append(CONVERSIONS[c].substring(1));
+        } else {
+          result.append(CONVERSIONS[c]);
+        }
+      } else if (Character.isLetter(c)) {
+        result.append(""'"");
+        while (Character.isLetter(c)) {
+          result.append(c);
+          if (++i < strftime.length()) {
+            c = strftime.charAt(i);
+          } else {
+            c = 0;
+          }
+        }
+        result.append(""'"");
+        --i; // re-consume last char
+      } else {
+        result.append(c);
+      }
+    }
+
+    return replaceL(result.toString());
+  }","parses a string in python strftime format , returning the equivalent string in java date time format .",how-it-is-done,The method takes a String representing an strftime formatting pattern and converts it into Java's DateTimeFormatter pattern using a map of conversion symbols to Java DateTimeFormatter patterns.,0.8585038185119629
+147,"	public void fightEnd() {
+		if (attackerCasualties == 0 && defenderCasualties == 0) {
+			this.activeFight = false;
+			this.attackerWins = false;
+			this.attackingBanner = null;
+			this.defendingBanner = null;
+			this.attackingProvince = null;
+			this.defendingProvince = null;
+		}
+	}
+",checks if the attacker can retreat and finishes the fight if possible,how-it-is-done,"The function sets activeFight, attackingBanner, defendingBanner, and attackingProvince to null when attackerCasualties and defenderCasualties are both zero.",0.8162283897399902
+148,"	 protected String doSOAP(HttpServletRequest req) throws ServletException{
+
+		 throw new ServletException(""SOAP result not supported"");
+	 }   
+",returns soap xml results to the caller,property,protected String doSOAP(HttpServletRequest req) throws ServletException{ // property,0.7923786044120789
+149,"	public String getStreetLine3() {
+		return(primitive.getStreet().getLine3());
+	}
+",gets the line3 field of the address street element,what,This method gets the line 3 of a street in the class primitive and returns it as a string.,0.8818973898887634

@@ -1,0 +1,2109 @@
+id,code,comment,label,GeneratedComment,BERTScore
+0,"public UnsafeSequence(final long initialValue){
+  UNSAFE.putOrderedLong(this,VALUE_OFFSET,initialValue);
+}
+",create a sequence with a specified initial value .,what,// Initializes an UnsafeSequence instance with a specified initial value using ordered memory access.,0.8894423842430115
+1,"public Builder deleteLocal(){
+  deleteFields.add(""locale"");
+  return this;
+}
+",delete the local value of a existing user,what,"// Adds ""locale"" to the list of fields to be deleted in the builder.",0.8425971269607544
+2,"private void normalizeLocalFileName(StringBuilder localFileName){
+  while (true) {
+    int dotDotIndex=localFileName.indexOf(""/../"");
+    if (dotDotIndex < 0) {
+      break;
+    }
+    int parentIndex=localFileName.lastIndexOf(""/"",dotDotIndex - 1);
+    if (parentIndex < 0) {
+      break;
+    }
+    localFileName.delete(parentIndex,dotDotIndex + 3);
+  }
+  if (localFileName.length() >= 3 && localFileName.lastIndexOf(""/.."") == localFileName.length() - 3) {
+    if (localFileName.length() <= 3) {
+      localFileName.setLength(0);
+    }
+ else {
+      int parentIndex=localFileName.lastIndexOf(""/"",localFileName.length() - 4);
+      if (parentIndex < 0) {
+        localFileName.setLength(0);
+      }
+ else {
+        localFileName.setLength(parentIndex);
+      }
+    }
+  }
+  while (true) {
+    int dotIndex=localFileName.indexOf(""/./"");
+    if (dotIndex < 0) {
+      break;
+    }
+    localFileName.delete(dotIndex,dotIndex + 2);
+  }
+  if (localFileName.length() >= 2 && localFileName.lastIndexOf(""/."") == localFileName.length() - 2) {
+    localFileName.setLength(localFileName.length() - 2);
+  }
+  if (localFileName.length() > 0 && localFileName.charAt(0) == '/') {
+    localFileName.deleteCharAt(0);
+  }
+  if (localFileName.length() > 0 && localFileName.charAt(localFileName.length() - 1) == '/') {
+    localFileName.setLength(localFileName.length() - 1);
+  }
+}
+","normalize the given local file name : - resolve "" . . "" and "" . "" special notation - remove leading and trailing "" / """,noisy,"// Simplifies a local file path by resolving "".."" and ""."" references and removing leading/trailing slashes.",0.8727142810821533
+3,"	public Music getMusic() {
+		if (m_multiPartsDef == null) {
+			if (m_parts == null) //no part at all
+				return (m_defaultPart.getMusic());
+			else //ah, they are some parts, but no part order
+				//return the same thing than graphical rendition
+				//parts in alphabetic order
+				return getMusicForGraphicalRendition();
+		}
+		else {
+			Music globalScore = newMusic();
+			globalScore.append(m_defaultPart.getMusic());
+			Part[] parts = m_multiPartsDef.toPartsArray();
+			for (int i = 0; i < parts.length; i++) {
+				globalScore.append(parts[i].getMusic());
+			}
+			return globalScore;
+		}
+	}
+",returns the music of this tune in a raw form,property,"// Retrieves the complete music score, considering default parts and multi-part definitions.",0.8575654029846191
+4,"public boolean isQuoteDelimiter(String character){
+  return (m_QuoteDelimiters.indexOf(character.charAt(0)) > -1);
+}
+",checks whether the character is quote delimiter .,what,// Checks if the given character is a recognized quote delimiter.,0.9192514419555664
+5,"public void addColumn(String header){
+  WTableColumn tableColumn;
+  tableColumn=new WTableColumn();
+  tableColumn.setHeaderValue(Util.cleanAmp(header));
+  setColumnVisibility(tableColumn,true);
+  m_tableColumns.add(tableColumn);
+  return;
+}
+",add table column .,what,// Adds a new column to the table with a sanitized header value.,0.8838546276092529
+6,"	public ArrayList getEdgesBetween(Node source, Node target){
+		ArrayList ans=new ArrayList();
+		
+		EdgeIterator eit=edges();
+		
+		while(eit.hasNext()){
+			Edge edge=eit.nextEdge();
+			if((edge.source()==source && edge.target()==target)||
+					(edge.target()==source && edge.source()==target))
+				ans.add(edge);
+		}
+		
+		return ans;
+	}
+",get the set of edges between the source and the target,what,"// Retrieves a list of edges connecting the specified source and target nodes, regardless of direction.",0.9141817092895508
+7,"public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow,
+            String[] columns, Filter f, Queue filterClausequeue)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        // columnFamily has a different meaning for HBase, so it won't be used
+        // here
+        String tableName = entityMetadata.getSchema();
+        List results = new ArrayList();
+
+        FilterList filter = new FilterList();
+        if (f != null)
+        {
+            filter.addFilter(f);
+        }
+        if (isFindKeyOnly(metadata, columns))
+        {
+            columns = null;
+            filter.addFilter(new KeyOnlyFilter());
+        }
+
+        try
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            EntityType entityType = metaModel.entity(entityClass);
+
+            List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
+            if (!subManagedType.isEmpty())
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
+                    List found = handler.readDataByRange(tableName, subEntityMetadata.getEntityClazz(),
+                            subEntityMetadata, startRow, endRow, columns, filter);
+                    results.addAll(found);
+                }
+            }
+            else
+            {
+                results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow, columns, filter);
+            }
+            if (showQuery && filterClausequeue.size() > 0)
+            {
+                KunderaCoreUtils.printQueryWithFilterClause(filterClausequeue, entityMetadata.getTableName());
+            }
+        }
+        catch (IOException ioex)
+        {
+            log.error(""Error during find by range, Caused by: ."", ioex);
+            throw new KunderaException(ioex);
+        }
+        return results;
+    }",handles find by range query for given start and end row key range values .,how-it-is-done,"// Retrieves a list of entities within a specified range, applying optional filters and handling sub-entities.",0.8322490453720093
+8,"private int readUTFChar(StringBuilder sbuf,long utflen) throws IOException {
+  int b1, b2, b3;
+  b1=readByte() & 0xFF;
+switch (b1 >> 4) {
+case 0:
+case 1:
+case 2:
+case 3:
+case 4:
+case 5:
+case 6:
+case 7:
+    sbuf.append((char)b1);
+  return 1;
+case 12:
+case 13:
+if (utflen < 2) {
+  throw new UTFDataFormatException();
+}
+b2=readByte();
+if ((b2 & 0xC0) != 0x80) {
+throw new UTFDataFormatException();
+}
+sbuf.append((char)(((b1 & 0x1F) << 6) | ((b2 & 0x3F) << 0)));
+return 2;
+case 14:
+if (utflen < 3) {
+if (utflen == 2) {
+readByte();
+}
+throw new UTFDataFormatException();
+}
+b2=readByte();
+b3=readByte();
+if ((b2 & 0xC0) != 0x80 || (b3 & 0xC0) != 0x80) {
+throw new UTFDataFormatException();
+}
+sbuf.append((char)(((b1 & 0x0F) << 12) | ((b2 & 0x3F) << 6) | ((b3 & 0x3F) << 0)));
+return 3;
+default :
+throw new UTFDataFormatException();
+}
+}
+","reads in single utf - encoded character one byte at a time , appends the character to sbuf , and returns the number of bytes consumed .",how-it-is-done,// Converts UTF-8 encoded bytes to a character and appends it to the StringBuilder.,0.8695091605186462
+9,"public GrpcChannelBuilder setChannelType(Class<? extends io.netty.channel.Channel> channelType) {
+    mChannelKey.setChannelType(channelType);
+    return this;
+  }",sets the channel type .,what,// Sets the channel type for the gRPC channel builder.,0.9044361114501953
+10,"private void initConnection() throws AdeException {
+  if (!dbPropertiesInitialized) {
+    throw new AdeInternalException(""DB configuration is undefined."");
+  }
+  mLogger.debug(""Loading driver "" + dbDriver);
+  try {
+    Class.forName(dbDriver);
+  }
+ catch (  ClassNotFoundException e) {
+    throw new AdeInternalException(""Loading driver failed."",e);
+  }
+  mLogger.debug(""Connecting to database "" + dbURL);
+  try {
+    if (dbUserName == null || dbUserPassword == null) {
+      dbConnection=DriverManager.getConnection(dbURL);
+    }
+ else {
+      dbConnection=DriverManager.getConnection(dbURL,dbUserName,dbUserPassword);
+    }
+  }
+ catch (  SQLException e) {
+    throw new AdeInternalException(""Failed obtaining connection."",e);
+  }
+catch (  Throwable t) {
+    throw new AdeInternalException(""Failed obtaining connection."",t);
+  }
+}
+",initializes a connection object .,what,// Initializes the database connection using specified properties and driver.,0.8751766085624695
+11,"public static void startServices(ServiceHost host,Class... services) throws InstantiationException, IllegalAccessException {
+  checkArgument(services != null,""services cannot be null"");
+  for (  Class service : services) {
+    startService(host,service);
+  }
+}
+",starts the list of services on the host .,what,// Initializes and starts the specified services on the given host.,0.8793866038322449
+12,"	public String rawFormat() {
+		return name + "" "" + getID();
+	}
+",function returns the raw string representation of this object,property,// Returns the raw format of the object as a concatenation of name and ID.,0.9027068018913269
+13,"private String showPrompt(String prompt) {
+        verifySystemOut();
+        cursorMove = 0;
+        if (!userInputActive) {
+            return readLine(prompt, false);
+        }
+
+        out.print(prompt);
+        out.flush();
+        return null;
+    }",shows the prompt to request user input .,why,// Displays a prompt to the user and reads input if not currently active.,0.8862619400024414
+14,"					protected void handleFailure(ACLMessage failure) {
+						if (failure.getSender().equals(myAgent.getAMS())) {
+							// FAILURE notification from the JADE runtime: the receiver
+							// does not exist
+							print(""Responder does not exist"");
+						}
+						else {
+							budget += reserved;
+							print(""Agent ""+failure.getSender().getName()+"" failed. Rolled back budget."");
+						}
+						// Immediate failure --> we will not receive a response from this agent
+						nResponders --;
+					}
+",handle failures e g in case the product is not available anymore,property,// Handles failure notifications from agents and updates the budget accordingly.,0.8606429100036621
+15,"public String generateCreate(String table) throws DatabaseException {
+  StringBuffer result=new StringBuffer();
+  try {
+    StringBuffer sql=new StringBuffer();
+    sql.append(""SELECT * FROM "");
+    sql.append(table);
+    ResultSet rs=executeQuery(sql.toString());
+    ResultSetMetaData md=rs.getMetaData();
+    result.append(""CREATE TABLE "");
+    result.append(table);
+    result.append("" ( "");
+    for (int i=1; i <= md.getColumnCount(); i++) {
+      if (i != 1) {
+        result.append(',');
+      }
+      result.append(md.getColumnName(i));
+      result.append(' ');
+      String type=processType(md.getColumnTypeName(i),md.getPrecision(i));
+      result.append(type);
+    }
+    result.append("" ) "");
+    rs.close();
+  }
+ catch (  SQLException e) {
+    throw (new DatabaseException(e));
+  }
+  return result.toString();
+}
+",generate the create statement to create the specified table .,why,// Generates a SQL CREATE TABLE statement based on the metadata of an existing table.,0.8809073567390442
+16,"private AbstractInvocation dequeue() {
+    if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled()) SibTr.entry(this, tc, ""dequeue"");
+
+    AbstractInvocation invocation;
+
+    synchronized (barrier) {
+      invocation = queue.remove(0);
+    }
+
+    if (TraceComponent.isAnyTracingEnabled() && tc.isEntryEnabled()) SibTr.exit(this, tc, ""dequeue"", invocation);
+    return invocation;
+  }",dequeue an invocation by removing it from the front of the queue,how-it-is-done,// Removes and returns the first invocation from the queue while ensuring thread safety and tracing.,0.8907533884048462
+17,"public TrieNode(TrieNode predecessor,Map<Symbol,Integer> label2idMap,List<Symbol> labels){
+  this.backPointer=predecessor;
+}
+",this constructs a trienode and specifies its predecessor .,how-it-is-done,// Initializes a TrieNode with a reference to its predecessor node.,0.8794676065444946
+18,"public Class defineClass() {
+        byte[] bytes;
+        try {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            writeTo(bout);
+            bytes = bout.toByteArray();
+        } catch (IOException e) {
+            InternalError ie = new InternalError(e.toString());
+            ie.initCause(e);
+            throw ie;
+        }
+
+        if (DEBUG) {
+            File file = new File(getClassName().replace('.', '/') + "".class"");
+            try {
+                File tempDir = new File(System.getProperty(""java.io.tmpdir""));
+                file = new File(tempDir, file.getPath());
+            } catch (SecurityException e) {
+            }
+            try {
+                file.getParentFile().mkdirs();
+                System.out.println(""RuntimeClassFile writing to "" + file);
+                OutputStream out = new FileOutputStream(file);
+                out.write(bytes);
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return mLoader.define(getClassName(), bytes);
+    }",finishes the class definition .,what,// Generates a class definition from bytecode and optionally writes it to a temporary file for debugging.,0.8708116412162781
+19,"private static int writeSize(List<? extends OffsettedItem> items){
+  OffsettedItem first=items.get(0);
+  return (items.size() * first.writeSize()) + getAlignment(items);
+}
+",calculates the write size for the given list .,why,"// Calculate total size for writing items, including alignment adjustments.",0.8859724998474121
+20,"    public void picked(Class source, Object messageData, Vector3f origin, Vector3f direction, PickInfo results) {
+        System.out.println(this + "" Name: "" + getName() + "" picked! by "" + source + "" : "" + messageData);
+    }
+",callback on being picked,how-to-use,// Call this method to log a pick event with source information and message details.,0.8317188024520874
+21,"	public void applyRenderKit () {
+		if (this.renderKit != null) {
+			Gracelets.getGraceletsContext().setSpecifiedRenderKitId(this.renderKit.getName());
+		}
+	}
+",if a render kit was defined make it the current render kit,how-it-is-done,// Sets the specified RenderKit ID in the context if a valid RenderKit is available.,0.8730431199073792
+22,"private static boolean isDataTypeSetPrecisely(Element bindNode){
+  String type=bindNode.getAttributeValue(null,ATTRIBUTE_TYPE);
+  if (type != null && !type.equalsIgnoreCase(DATA_TYPE_TEXT))   return true;
+  return false;
+}
+",checks if the xforms data type is set to any value other than text .,what,"// Check if the bindNode's data type is set to a value other than ""text"".",0.9279093742370605
+23,"	protected long getAskVolumeAtPrice(double price){
+		long volume = 0;
+		//Returns zero immediately if there is no order at this price or the book is empty
+		for(Order order : askLimitOrders){
+			if(order.getPrice() == price)
+				volume += order.getOpenQuantity();
+			if(order.getPrice() > price)
+				break;
+		}
+		return volume;
+	}
+",get this instruments ask volume at specific price,what,// Calculates the total ask volume at a specified price from the order book.,0.8710995316505432
+24,"public Matrix4x3d identity() {
+        if ((properties & PROPERTY_IDENTITY) != 0)
+            return this;
+        m00 = 1.0;
+        m01 = 0.0;
+        m02 = 0.0;
+        m10 = 0.0;
+        m11 = 1.0;
+        m12 = 0.0;
+        m20 = 0.0;
+        m21 = 0.0;
+        m22 = 1.0;
+        m30 = 0.0;
+        m31 = 0.0;
+        m32 = 0.0;
+        properties = PROPERTY_IDENTITY | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL;
+        return this;
+    }",reset this matrix to the identity .,what,// Initializes and returns the identity matrix if not already set.,0.859512985
+25,"public static double getScaleFactor(IAtomContainer container, double bondLength) {
+        double currentAverageBondLength = getBondLengthMedian(container);
+        if (currentAverageBondLength == 0 || Double.isNaN(currentAverageBondLength)) return 1;
+        return bondLength / currentAverageBondLength;
+    }",determines the scale factor for displaying a structure loaded from disk in a frame .,why,// Calculate the scale factor for a given bond length based on the container's average bond length.,0.8786832094192505
+26,"	public void substractResources(Resources resource, int quantity) throws NotEnoughResourcesException {
+		Integer totalResources = resources.get(resource);
+		if (totalResources == null || totalResources - quantity < 0) {
+			throw new NotEnoughResourcesException(resource, this);
+		} else {
+			totalResources -= quantity;
+		}
+		resources.put(resource, totalResources);
+	}
+",method that takes resources from the city,what,"// Reduces the specified quantity of resources, throwing an exception if insufficient resources are available.",0.8550091981887817
+27,"public TablePanel remove(Widget widget) {
+		for (int i = 0; i < content.length; ++i)
+			for (int j = 0; j < content[i].length; ++j)
+				if (content[i][j] == widget) content[i][j] = null;
+		this.sendElement();
+		return this;
+	}",removes all elements that are instance of specified element,what,// Removes the specified widget from the table and updates the panel display.,0.8637816905975342
+28,"static public boolean isZero(float value,float tolerance){
+  return Math.abs(value) <= tolerance;
+}
+",returns true if the value is zero .,property,// Checks if a given float value is considered zero within a specified tolerance.,0.8712056279182434
+29,"public boolean hasItems(){
+  return items != null && !items.isEmpty();
+}
+",indicates whether this dashboard has at least one item .,what,// Checks if the 'items' list is non-null and contains at least one item.,0.8746534585952759
+30,"  public int addToQueue(Entry entry, int position) throws IOException, UPNPResponseException {
+    ActionMessage message = messageFactory.getMessage(""AddURIToQueue"");
+    message.setInputParameter(""InstanceID"", 0);
+    message.setInputParameter(""EnqueuedURI"", entry.getRes());
+    message.setInputParameter(""EnqueuedURIMetaData"", compileMetadataString(entry));
+    message.setInputParameter(""DesiredFirstTrackNumberEnqueued"", position+1);
+    message.setInputParameter(""EnqueueAsNext"", true);
+    ActionResponse resp = message.service();
+    return Integer.parseInt(resp.getOutActionArgumentValue(""FirstTrackNumberEnqueued"")) -1;
+  }
+",adds the given entry to the end of the queue,how-it-is-done,// Constructs and sends a message to enqueue an entry at the specified position in the queue.,0.8797993659973145
+31,"private Tree<Row> findEndIf( Tree<Row> pointer ){
+        while( !Type.END_IF.equals( pointer.getContent().getType() ) ){
+            pointer = pointer.getNext();
+        }
+        return pointer;
+    }","finds the associate end _ if for an if , else _ if or else pointer",how-it-is-done,// Traverse the tree until the END_IF node is found.,0.8369471430778503
+32,"public ASRPDirectory(String path){
+  dir=new File(path);
+  if (dir.exists()) {
+    try {
+      initialize(dir.getPath(),dir.getName(),""01"");
+    }
+ catch (    IOException ioe) {
+      Debug.error(ioe.getMessage());
+      ioe.printStackTrace();
+      return;
+    }
+  }
+ else {
+    Debug.error(""ASRPDirectory ("" + path + "") doesn't exist"");
+  }
+}
+",create a new asrp directory for the given path .,why,// Constructs an ASRPDirectory instance by initializing it only if the specified path exists.,0.8615051507949829
+33,"public static Rectangle scaleRectangle(Rectangle rect,float scaleFactor){
+  return new Rectangle(Math.round(rect.x * scaleFactor),Math.round(rect.y * scaleFactor),Math.round(rect.width * scaleFactor),Math.round(rect.height * scaleFactor));
+}
+",scales the given rectangle by the given scale factor .,how-it-is-done,// Scales the rectangle's position and dimensions by the given scale factor.,0.9152707457542419
+34,"	public void setValid(boolean bValid) {
+		if(!bValid) {
+			this.m_comboBox.setBorder(BorderFactory.createLineBorder(Color.RED));
+			this.m_errorLabel.setIcon(IconManager.getInstance().getIcon(""16-message-error.gif""));
+		} else {
+			this.m_comboBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			this.m_errorLabel.setIcon(IconManager.getInstance().getIcon(""16-message-confirm.gif""));
+		}
+		this.revalidate();
+		this.repaint();
+	}
+",sets whether this components value is valid,what,// Sets the visual feedback for the validity state of a form element.,0.8342161774635315
+35,"@SuppressWarnings(""unchecked"")
+    public static <T> T getRandomSelection(List<T> options) {
+        return (T) getRandomSelection(options.toArray(new Object[options.size()]));
+    }",randomly chooses and returns one of the provided options .,how-it-is-done,// Converts a list of options into an array and selects a random element from it.,0.861299455
+36,"public List<QueryStatisticInner> listByQuery(String resourceGroupName, String serverName, String databaseName, String queryId) {
+        return listByQueryWithServiceResponseAsync(resourceGroupName, serverName, databaseName, queryId).toBlocking().single().body();
+    }",lists a query ' s statistics .,what,// Retrieves a list of query statistics for a specified database and query ID.,0.8584286570549011
+37,"    public boolean isLeaf(Object node) {
+        try {
+            return ((TreeNode) node).isLeaf();
+        }
+        catch (ClassCastException ex) { // not a TreeNode?
+            return getChildCount(node) == 0;
+        }
+    }
+",returns true if the specified node is a leaf node false otherwise,property,// Determines if the given node is a leaf node in the tree structure.,0.8824296593666077
+38,"public synchronized void removeListener(final T listener){
+  listeners.remove(listener);
+}
+",unsubscribes the listener for update notifications .,why,// Safely removes a listener from the list to prevent concurrency issues.,0.8432544469833374
+39,"protected FactoryDto updateProjectInFactory(final FactoryDto factory,final String repositoryUrl,final String headBranch,final String headCommitId) throws ServerException {
+  return updateProjectInFactory(factory,repositoryUrl,headBranch,repositoryUrl,headCommitId);
+}
+",update project matching given predicate in given factory,how-it-is-done,// Calls recursive method to update a project in the factory using provided repository details.,0.8651445508003235
+40,"public void renameThread(String base_name, Thread thread, String addr, String cluster_name) {
+        String thread_name=getThreadName(base_name, thread, addr, cluster_name);
+        if(thread_name != null)
+            thread.setName(thread_name);
+    }","names a thread according to base _ name , cluster name and local address .",how-it-is-done,// Sets the thread's name based on a generated name from its parameters if not null.,0.842693567
+41,"public boolean orderByColumnsDetermineAllDisplayColumnsForUnion(
+            List<ParsedColInfo> orderColumns) {
+        Set<AbstractExpression> orderExprs = new HashSet<>();
+        for (ParsedColInfo col : orderColumns) {
+            orderExprs.add(col.m_expression);
+        }
+
+        for (ParsedColInfo col : m_displayColumns) {
+            if (! orderExprs.contains(col.m_expression)) {
+                return false;
+            }
+        }
+
+        return true;
+    }",this is a very simple version of the above method for when an order by clause appears on a union .,why,// Checks if all displayed columns are included in the specified order columns for a union operation.,0.8743067383766174
+42,"protected void loadGrams(DataInputStream input) throws IOException {
+    gramSet = new HashSet();
+    try {
+      while(true) {
+        int gramLength=input.readInt();
+      
+        int[] words = new int[gramLength];
+        for (int wi=0;wi<gramLength;wi++) {
+          words[wi]=input.readInt();
+        }
+        gramSet.add(new NGram(words));
+      }
+    }
+    catch(EOFException e) {
+      
+    }
+  }",loads the contents of the specified input stream into this dictionary .,what,// Reads N-grams from an input stream and stores them in a HashSet until the end of the stream.,0.8752313852310181
+43,"private ContentElement parseContentElement(SpanManager sm,ContentElementParsingParameters cepp,Span lineSpan,ContentElement result){
+  LinkedList<Span> lineSpans=new LinkedList<Span>();
+  lineSpans.add(lineSpan);
+  return parseContentElement(sm,cepp,lineSpans,result);
+}
+",building a contentelement from a single line .,what,// Initializes a linked list of spans and parses a content element with the provided parameters.,0.8687371611595154
+44,"protected void stopWithErrorMessage(String error,Exception ex){
+  stop();
+  if (m_log != null) {
+    m_log.statusMessage(statusMessagePrefix() + error + "" - see log for details"");
+    m_log.logMessage(statusMessagePrefix() + error + (ex != null ? "" "" + ex.getMessage() : """"));
+  }
+}
+",stops the step ( and upstream ones ) and then prints an error message and optional exception message,how-it-is-done,// Stops the process and logs the provided error message along with exception details if available.,0.8771268129348755
+45,"public static String fromDoc2String(Document doc) throws IOException {
+  KXmlSerializer serializer=new KXmlSerializer();
+  ByteArrayOutputStream bos=new ByteArrayOutputStream();
+  serializer.setFeature(""http://xmlpull.org/v1/doc/features.html#indent-output"",true);
+  serializer.setOutput(bos,XformConstants.DEFAULT_CHARACTER_ENCODING);
+  doc.write(serializer);
+  serializer.flush();
+  return new String(bos.toByteArray(),XformConstants.DEFAULT_CHARACTER_ENCODING);
+}
+",converts an xml document to a string .,how-it-is-done,// Serializes a Document to a formatted XML string using KXmlSerializer and a ByteArrayOutputStream.,0.8887904286384583
+46,"  public void run() {
+    while(go) {
+      Object[] elems = null;
+      synchronized(this) {
+	if(queue.isEmpty()) {
+	  try{wait();} catch(InterruptedException e) {Util.printStackTrace(e);}
+	}
+	if(queue.size() == 1) {
+	  singleton[0] = queue.removeFirst();
+	  elems = singleton;
+	}
+	else {
+	  elems = queue.toArray();
+	  queue.clear();
+	}
+	if(queue.isEmpty() && flushing)
+	  notify();
+      }
+      go = handle(elems);
+      handles++;
+    }
+  }
+",the read from queue loop,noisy,"// Continuously processes elements from the queue until instructed to stop, handling both single and multiple items.",0.8577693104743958
+47,"private void updateComputeNodeUser(String poolId, String nodeId, String userName, NodeUpdateUserParameter nodeUpdateUserParameter, Iterable<BatchClientBehavior> additionalBehaviors) throws BatchErrorException, IOException {
+        ComputeNodeUpdateUserOptions options = new ComputeNodeUpdateUserOptions();
+        BehaviorManager bhMgr = new BehaviorManager(this.customBehaviors(), additionalBehaviors);
+        bhMgr.applyRequestBehaviors(options);
+
+        this.parentBatchClient.protocolLayer().computeNodes().updateUser(poolId, nodeId, userName, nodeUpdateUserParameter, options);
+    }",updates the specified user account on the specified compute node .,what,// Updates the user credentials for a specified compute node in a given pool.,0.8991668820381165
+48,"public static boolean isReadable(@NonNull final File file){
+  if (!file.isFile()) {
+    LogHelper.d(TAG,""isReadable(): Not a File"");
+    return false;
+  }
+  return file.exists() && file.canRead();
+}
+",checks if file could be read or created,what,// Checks if the specified file exists and is readable.,0.8717619180679321
+49,"    public Form getIntervals() {
+        if (Intervals == null) {//GEN-END:|61-getter|0|61-preInit
+            // write pre-init user code here
+            Intervals = new Form(""Interval training"", new Item[] { getMessageBox(), getAnswerSelect(), getEnabledIntervals(), getVolumeInputIntervals() });//GEN-BEGIN:|61-getter|1|61-postInit
+            Intervals.addCommand(getBackCommand());
+            Intervals.addCommand(getNewCommand());
+            Intervals.addCommand(getRepeatCommand());
+            Intervals.setCommandListener(this);//GEN-END:|61-getter|1|61-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|61-getter|2|
+        return Intervals;
+    }
+",returns an initiliazed instance of intervals component,property,// Lazily initializes and returns the Intervals form with necessary components and commands.,0.8426798582077026
+50,"public static <T> List<T> query(Class<T> targetClass, final Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder,
+            CancellationSignal cancellationSignal) {
+        final Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+
+        try {
+            return toList(targetClass, cursor);
+        } finally {
+            closeQuietly(cursor);
+        }
+    }",query by context . getcontentresolver ( ) .,how-it-is-done,"// Query the content resolver, convert the cursor results to a list of the specified type, and ensure the cursor is closed afterwards.",0.8257756233215332
+51,"private List<Match<T>> sort(final Map<String,Match<T>> possibleMatches){
+  List<String> keys=new ArrayList<>(possibleMatches.keySet());
+  Collections.sort(keys,matchComparator);
+  List<Match<T>> matches1=new ArrayList<>(possibleMatches.size());
+  for (  String key : keys) {
+    matches1.add(possibleMatches.get(key));
+  }
+  return matches1;
+}
+","sort the matches according to their precedence ( that is , according to the precedence of their keys ) .",noisy,// Sorts the matches by keys and returns a list of sorted Match objects.,0.8560416102409363
+52,"	public List getNamespaces() {
+		List ns = new LinkedList();
+		ns.add(name);
+		if (attributes != EmptyStructures.EMPTY_MAP) {
+			Iterator it = attributes.values().iterator();
+			while (it.hasNext()) {
+				ParameterAttribute pa = (ParameterAttribute) it.next();
+				ns.add(pa.getName());
+			}
+		}
+		return ns;
+	}
+",returns the namespaces used by this parameter value,property,// Collects and returns a list of namespace names including the main name and attribute names if present.,0.8532814979553223
+53,"private static <E> Counter<Integer> collectCountCounts(Counter<E> counts) {
+    Counter<Integer> cc = new ClassicCounter<Integer>(); // counts of counts
+    for (Map.Entry<E, Double> entry : counts.entrySet()) {
+      //E item = entry.getKey();
+      Integer count = (int) Math.round(entry.getValue());
+      cc.incrementCount(count);
+    }
+    return cc;
+  }",helper to simplegoodturingsmoothedcounter ( ),noisy,// Generates a counter of the rounded counts from the input counter of items.,0.8242102265357971
+54,"protected void submit() {
+
+        if (m_userinfoNoEditGroup.getRows().size() != m_addInfoReadOnly.size()) {
+            List<String> currentKeys = getKeyListFromGroup(m_userinfoNoEditGroup);
+            for (String key : m_addInfoReadOnly.keySet()) {
+                if (!currentKeys.contains(key)) {
+                    saveAddInfo(key, null);
+                }
+            }
+        }
+
+        for (I_CmsEditableGroupRow row : m_userinfoGroup.getRows()) {
+            String key = ((TextField)(((HorizontalLayout)row.getComponent()).getComponent(0))).getValue();
+            String value = ((TextField)(((HorizontalLayout)row.getComponent()).getComponent(1))).getValue();
+            saveAddInfo(key, value);
+            m_addInfoEditable.remove(key);
+        }
+
+        //Remaining items in list seem to be deleted by the user..
+        for (String key : m_addInfoEditable.keySet()) {
+            saveAddInfo(key, null);
+        }
+        try {
+            m_cms.writeUser(m_user);
+        } catch (CmsException e) {
+            LOG.error(""Unable to write user."", e);
+        }
+    }",submit additional info to user .,what,// Submits user information by saving editable fields and handling deletions in the user data.,0.8421207070350647
+55,"	protected void addListeners() {
+		addWindowListener(
+			new WindowAdapter() {
+				public void windowClosing(WindowEvent event) {
+                    handleWindowClose();
+				}
+			}
+		);
+	}
+",registers the listeners for this window,why,// Register a listener to handle the window closing event and trigger cleanup logic.,0.8385137915611267
+56,"public static File createTempFile(final String ext) {
+		try {
+			File file;
+			file = File.createTempFile(""jk-"", ""."" + ext);
+			return file;
+		} catch (IOException e) {
+			JK.throww(e);
+			return null;
+		}
+	}",creates the temp file .,what,// Creates a temporary file with a specified extension and handles IO exceptions.,0.8748732209205627
+57,"public String composeOtpAttribute(OTPUserRecord otpUserRecord) throws PwmUnrecoverableException {
+  String value="""";
+  if (otpUserRecord != null) {
+    final Configuration config=pwmApplication.getConfig();
+    final OTPStorageFormat format=config.readSettingAsEnum(PwmSetting.OTP_SECRET_STORAGEFORMAT,OTPStorageFormat.class);
+switch (format) {
+case PWM:
+      value=JsonUtil.serialize(otpUserRecord);
+    break;
+case OTPURL:
+  value=OTPUrlUtil.composeOtpUrl(otpUserRecord);
+break;
+case BASE32SECRET:
+value=otpUserRecord.getSecret();
+break;
+case PAM:
+value=OTPPamUtil.composePamData(otpUserRecord);
+break;
+default :
+String errorStr=String.format(""Unsupported storage format: "",format.toString());
+ErrorInformation error=new ErrorInformation(PwmError.ERROR_INVALID_CONFIG,errorStr);
+throw new PwmUnrecoverableException(error);
+}
+}
+return value;
+}
+",compose a single line of otp information .,what,// Composes an OTP attribute based on the storage format specified in the application configuration.,0.8554877042770386
+58,"public FoxHttpRequestBuilder addRequestQueryEntry(String name, String value) {
+        foxHttpRequest.getRequestQuery().addQueryEntry(name, value);
+        return this;
+    }",add a new query entry,what,// Adds a query entry with the specified name and value to the HTTP request.,0.9055730700492859
+59,"    public void fromAngleAxis(float angle, fVector3 axis) {
+        fVector3 normAxis = axis.normalize();
+        fromAngleNormalAxis(angle, normAxis);
+    }
+",fromangleaxis sets this matrix4f to the values specified by an angle and an axis of rotation,how-it-is-done,// Normalizes the provided axis vector and uses it to create a rotation from the given angle.,0.8710129261016846
+60,"public String timeAgo(final Date date){
+  return timeAgo(date.getTime());
+}
+",get time ago that date occurred,what,"// Converts a Date object to a human-readable ""time ago"" format.",0.8222458362579346
+61,"	public void leave() {
+		ChatAdministration.getInstance().removeFileFromList(this);
+		
+	} 
+",removes the file from the filelist,what,// Removes the current instance from the chat file list in the administration.,0.9008249640464783
+62,"public String undo(){
+  if (!canUndo()) {
+    return """";
+  }
+  UndoAction undoAction=m_undoStack.get(m_nCurrentEditAction);
+  m_bNeedsUndoAction=false;
+  undoAction.undo();
+  m_bNeedsUndoAction=true;
+  m_nCurrentEditAction--;
+  return undoAction.getUndoMsg();
+}
+",undo the last edit action performed on the network .,what,// Executes the most recent undo action and returns its message if possible.,0.8612267374992371
+63,"@Override public Segment intersect(long from,long to){
+  long start=Math.max(from,this.segmentStart);
+  long end=Math.min(to,this.segmentEnd);
+  if (start <= end) {
+    return new SegmentRange(start,end);
+  }
+ else {
+    return null;
+  }
+}
+",returns a segment that is the intersection of this segment and the interval .,property,// Computes the intersection of the current segment with the specified range.,0.8889890313148499
+64,"private static BigDecimal doAdd(final BigDecimal v1, final BigDecimal v2) {
+        BigDecimal total = v1;
+        if (v1 != null && v2 != null) {
+            total = v1.add(v2);
+        } else if (v2 != null) {
+            total = v2;
+        }
+        return total;
+    }",add 2 bigdecimal safely ( i . e . handles nulls as zeros ),noisy,"// Adds two BigDecimal values, handling nulls by returning the non-null value or zero.",0.847062886
+65,"public static String getVMStatus(String hostIpPort, String id) throws TargetException {
+
+		if(id.startsWith(""urn:uuid:"")) id = id.substring(9);
+		String status = null;
+		URL url = null;
+		try {
+			CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+			url = new URL(""http://"" + hostIpPort + ""/compute/"" + id);
+		} catch (MalformedURLException e) {
+			throw new TargetException(e);
+		}
+
+		HttpURLConnection httpURLConnection = null;
+		DataInputStream in = null;
+		try {
+			httpURLConnection = (HttpURLConnection) url.openConnection();
+			httpURLConnection.setRequestMethod(""GET"");
+			httpURLConnection.setRequestProperty(""Accept"", ""application/json"");
+
+			in = new DataInputStream(httpURLConnection.getInputStream());
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Utils.copyStreamSafely(in, out);
+
+			// Parse JSON response to extract VM status
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonResponse rsp = objectMapper.readValue(out.toString( ""UTF-8"" ), JsonResponse.class);
+			status = rsp.getState();
+
+		} catch (IOException e) {
+			throw new TargetException(e);
+
+		}  finally {
+			Utils.closeQuietly(in);
+			if (httpURLConnection != null) {
+				httpURLConnection.disconnect();
+			}
+		}
+
+		return status;
+	}",retrieves vm status ( tested on ca only ) .,how-to-use,// Retrieves the VM status by making a GET request to the specified host using its ID.,0.8484727740287781
+66,"	public int getSequenceNumber() {
+		if (sequenceNumber == null)
+			return Integer.MAX_VALUE;
+  
+		return sequenceNumber.getValue();
+	}
+",returns the flaps sequence number,property,// Returns the sequence number or Integer.MAX_VALUE if it's not set.,0.8624505996704102
+67,"public String buildSelectDeleteFileMode(String htmlAttributes) {
+
+        List<String> options = new ArrayList<String>(2);
+        options.add(key(Messages.GUI_PREF_PRESERVE_SIBLINGS_0));
+        options.add(key(Messages.GUI_PREF_DELETE_SIBLINGS_0));
+        List<String> values = new ArrayList<String>(2);
+        values.add(String.valueOf(CmsResource.DELETE_PRESERVE_SIBLINGS));
+        values.add(String.valueOf(CmsResource.DELETE_REMOVE_SIBLINGS));
+        int selectedIndex = values.indexOf(getParamTabDiDeleteFileMode());
+        return buildSelect(htmlAttributes, options, values, selectedIndex);
+    }",builds the html for the default delete file mode select box .,why,// Constructs a select dropdown for file deletion modes with corresponding display options and values.,0.8886880874633789
+68,"public static AccessibilityNodeInfoCompat searchFocus(TraversalStrategy traversal,AccessibilityNodeInfoCompat currentFocus,int direction,NodeFilter filter){
+  if (traversal == null || currentFocus == null) {
+    return null;
+  }
+  if (filter == null) {
+    filter=DEFAULT_FILTER;
+  }
+  AccessibilityNodeInfoCompat targetNode=AccessibilityNodeInfoCompat.obtain(currentFocus);
+  Set<AccessibilityNodeInfoCompat> seenNodes=new HashSet<>();
+  try {
+    do {
+      seenNodes.add(targetNode);
+      targetNode=traversal.findFocus(targetNode,direction);
+      if (seenNodes.contains(targetNode)) {
+        LogUtils.log(AccessibilityNodeInfoUtils.class,Log.ERROR,""Found duplicate during traversal: %s"",targetNode.getInfo());
+        return null;
+      }
+    }
+ while (targetNode != null && !filter.accept(targetNode));
+  }
+  finally {
+    AccessibilityNodeInfoUtils.recycleNodes(seenNodes);
+  }
+  return targetNode;
+}
+",search focus that satisfied specified node filter from currentfocus to specified direction according to ordertraversal strategy,how-it-is-done,"// Traverses nodes in a specified direction, applying a filter to find the next focusable node.",0.8678753972053528
+69,"public static Integer findLimit(Map<String,String> operatorProperties) throws PlanGenException {
+  String limitStr=getOptionalProperty(LIMIT,operatorProperties);
+  if (limitStr == null) {
+    return null;
+  }
+  Integer limit=Integer.parseInt(limitStr);
+  if (limit < 0) {
+    throw new PlanGenException(""Limit must be equal to or greater than 0"");
+  }
+  return limit;
+}
+","this function finds the "" limit "" value in the operator ' s properties .",what,"// Retrieves and validates the 'limit' from operator properties, ensuring it is a non-negative integer.",0.8815059661865234
+70,"public static boolean isFullCopyDetached(Volume volume,DbClient dbClient){
+  boolean result=false;
+  String replicaState=volume.getReplicaState();
+  if (!isVolumeFullCopy(volume,dbClient) && replicaState != null && !replicaState.isEmpty()) {
+    ReplicationState state=ReplicationState.getEnumValue(replicaState);
+    if (state != null && state == ReplicationState.DETACHED) {
+      result=true;
+    }
+  }
+  return result;
+}
+",check if the full copy is detached .,what,// Checks if the given volume is a detached full copy based on its replica state.,0.8959401249885559
+71,"public static final String decode(String s,String enc) throws MalformedURLException, UnsupportedEncodingException {
+  try {
+    return URLDecoder.decode(s,enc);
+  }
+ catch (  IllegalArgumentException iae) {
+    MalformedURLException mue=new MalformedURLException(""Invalid URI encoding: "" + s);
+    mue.initCause(iae);
+    throw mue;
+  }
+}
+",decode a uri string ( according to rfc 2396 ) .,how-it-is-done,"// Decodes a URL-encoded string using the specified character encoding, throwing an exception for invalid inputs.",0.8453930616378784
+72,"  public void setNumFolds(int numFolds) {
+
+    if (numFolds < 0) {
+      throw new IllegalArgumentException(""Number of folds has to be positive or zero."");
+    }
+    m_NumFolds = numFolds;
+  }
+",sets the number of folds the dataset is split into,what,"// Sets the number of folds, ensuring it is non-negative.",0.8818747401237488
+73,"public static void main(String args[]) {
+        Statement stmts[] = null;
+        try {
+            stmts = getStatements(args[0]);
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        for (Statement s : stmts) {
+            System.out.print(s.statement);
+        }
+    }",run the parser as a stand - alone tool sending output to standard out .,what,"// Retrieve and print statements based on the input argument, handling potential errors.",0.8442562818527222
+74,"private void doWarmStartIfNotNull(Object warmSolution) throws FailedToFitException
+    {
+        if(warmSolution != null )
+        {
+            if(warmSolution instanceof SimpleWeightVectorModel)
+            {
+                SimpleWeightVectorModel warm = (SimpleWeightVectorModel) warmSolution;
+                if(warm.numWeightsVecs() != ws.length)
+                    throw new FailedToFitException(""Warm solution has "" + warm.numWeightsVecs() + "" weight vectors instead of "" + ws.length);
+                for(int i = 0; i < ws.length; i++)
+                {
+                    warm.getRawWeight(i).copyTo(ws[i]);
+                    if(useBiasTerm)
+                        bs[i] = warm.getBias(i);
+                }
+            }
+            else
+                throw new FailedToFitException(""Can not warm warm from "" + warmSolution.getClass().getCanonicalName());
+        }
+    }",performs a warm start if the given object is of the appropriate class .,what,// Initializes weight vectors and biases from a provided warm start solution if valid.,0.8677190542221069
+75,"@GET
+    @Path(""/enumdef/guid/{guid}"")
+    @Produces(Servlets.JSON_MEDIA_TYPE)
+    public AtlasEnumDef getEnumDefByGuid(@PathParam(""guid"") String guid) throws AtlasBaseException {
+        AtlasEnumDef ret = typeDefStore.getEnumDefByGuid(guid);
+
+        return ret;
+    }",get the enum definition for the given guid,why,// Retrieve the Enum Definition object based on the provided GUID.,0.8823934197425842
+76,"	   public void removeGestureHandler(MultimodalGestureHandler gestureHandler) {
+	      gestureHandlers.remove(gestureHandler);
+	   } // removeGestureHandler
+",removes a gesture handler from the recogniser,what,// Removes the specified gesture handler from the list of active handlers.,0.8838162422180176
+77,"     public void setLegajoCa83AntigAnt(int newValue) throws DataStoreException {
+          setInt(LEGAJO_CA_83_ANTIG_ANT, newValue);
+     }
+",set the value of the legajo ca 83 antig ant column for the current row,what,// Updates the LEGAJO_CA_83_ANTIG_ANT value in the data store.,0.8558281064033508
+78,"private void validateExplicitHashKey(final String explicitHashKey){
+  if (explicitHashKey == null) {
+    return;
+  }
+  BigInteger b=null;
+  try {
+    b=new BigInteger(explicitHashKey);
+    if (b.compareTo(UINT_128_MAX) > 0 || b.compareTo(BigInteger.ZERO) < 0) {
+      throw new IllegalArgumentException(""Invalid explicitHashKey, must be greater or equal to zero and less than or equal to (2^128 - 1), got "" + explicitHashKey);
+    }
+  }
+ catch (  NumberFormatException e) {
+    throw new IllegalArgumentException(""Invalid explicitHashKey, must be an integer, got "" + explicitHashKey);
+  }
+}
+",validate the explicit hash key of an input kinesis user record .,what,"// Validates that the explicitHashKey is a non-null integer within the range [0, 2^128 - 1].",0.8370898962020874
+79,"public MethodHandleConstant addMethodHandle(MethodHandleType mhType,
+                                              ConstantPoolEntry cpEntry)
+  {
+    MethodHandleConstant entry = getMethodHandle(mhType, cpEntry);
+
+    if (entry != null) {
+      return entry;
+    }
+
+    entry = new MethodHandleConstant(this, _entries.size(), mhType, cpEntry);
+
+    addConstant(entry);
+
+    return entry;
+  }",adds a method ref constant .,what,// Retrieves or creates a MethodHandleConstant in the constant pool based on the given method handle type and entry.,0.8563962578773499
+80,"public static Object withInputStream(Path self, @ClosureParams(value = SimpleType.class, options = ""java.io.InputStream"") Closure closure) throws IOException {
+        return IOGroovyMethods.withStream(newInputStream(self), closure);
+    }",create a new inputstream for this file and passes it into the closure .,how-it-is-done,// Executes the provided closure using an InputStream created from the specified file path.,0.8773735761642456
+81,"static private byte[] classToBytes(Class c){
+  return classNameToBytes(c.getName());
+}
+",returns the bytes used to represent a class in an oplog .,how-to-use,// Converts a Class object to its byte array representation using its name.,0.8690160512924194
+82,"public void setupMIC ( byte[] type1, byte[] type2 ) throws GeneralSecurityException, IOException {
+        byte[] sk = this.masterKey;
+        if ( sk == null ) {
+            return;
+        }
+        MessageDigest mac = Crypto.getHMACT64(sk);
+        mac.update(type1);
+        mac.update(type2);
+        byte[] type3 = toByteArray();
+        mac.update(type3);
+        setMic(mac.digest());
+    }",sets the mic,noisy,// Initializes the MIC using the master key and the provided type data to ensure data integrity.,0.8312883377075195
+83,"public void stopStartedContainers(boolean keepContainer,
+                                      boolean removeVolumes,
+                                      boolean removeCustomNetworks,
+                                      GavLabel gavLabel)
+        throws DockerAccessException, ExecException {
+        Set<Network> networksToRemove = new HashSet<>();
+        for (ContainerTracker.ContainerShutdownDescriptor descriptor : tracker.removeShutdownDescriptors(gavLabel)) {
+            collectCustomNetworks(networksToRemove, descriptor, removeCustomNetworks);
+            shutdown(descriptor, keepContainer, removeVolumes);
+        }
+        removeCustomNetworks(networksToRemove);
+    }",stop all registered container,what,"// Stops running containers associated with the given GavLabel, managing volumes and custom networks based on specified flags.",0.8311069011688232
+84,"public JsStatement setDate(DateOption dateOption)
+	{
+		return new JsQuery(this).$().chain(""datepicker"", ""'setDate'"",
+			dateOption != null ? dateOption.getJavascriptOption() : null);
+	}",method to set the date of the datepicker,why,// Sets the date in the datepicker using the provided DateOption or null if unspecified.,0.8980082869529724
+85,"    public double evaluate(double x, double epsilon) throws MathException {
+        return evaluate(x, epsilon, Integer.MAX_VALUE);
+    }
+",evaluates the continued fraction at the value x,what,// Initiates the evaluation process with a maximum iteration limit for convergence.,0.8487034440040588
+86,"public RecursiveZipHandler(List<String> subResourceNames,String collectionName,DeltaHandler<ResourceNode> parentHandler){
+  this.parentHandler=parentHandler;
+  this.collectionName=collectionName;
+  processCount=new AtomicInteger(subResourceNames.size());
+  nodes=new ArrayList<>();
+  xDeltaResponseNumber=new AtomicInteger(0);
+}
+",creates an new instance of the recursiveziphandler .,what,"// Initializes a RecursiveZipHandler with resource names, a collection name, and a parent DeltaHandler.",0.8592057228088379
+87,"	final private void addShapeNodeToScene(GL20Node node) {
+		GL20ResourceShape shapeResource = (GL20ResourceShape)node.getResource();
+
+		if (shapeResource.getResourceClassType() != GL20Resource.GL20RESOURCE_SHAPE_LINE_STRIP)
+			opaqueShaderNodes.add(node);
+		else
+			lineStripNodes.add(node);
+			
+		if (node.getSelectionState() != 0)
+			selectedNodes.add(node);
+	}
+",add a gl20node with a gl20resourceshape resource to the scene,how-it-is-done,// Adds the node to the appropriate collections based on its resource type and selection state.,0.8624045848846436
+88,"@SuppressWarnings({""unchecked""}) public FinalizableReferenceQueue(){
+  ReferenceQueue<Object> queue;
+  boolean threadStarted=false;
+  try {
+    queue=(ReferenceQueue<Object>)startFinalizer.invoke(null,FinalizableReference.class,this);
+    threadStarted=true;
+  }
+ catch (  IllegalAccessException e) {
+    throw new AssertionError(e);
+  }
+catch (  Throwable t) {
+    logger.log(Level.INFO,""Failed to start reference finalizer thread."" + "" Reference cleanup will only occur when new references are"" + "" created."",t);
+    queue=new ReferenceQueue<Object>();
+  }
+  this.queue=queue;
+  this.threadStarted=threadStarted;
+}
+",constructs a new queue .,what,"// Initializes a ReferenceQueue for finalizable objects, starting a cleanup thread if successful.",0.8573636412620544
+89,"public static <T,U extends InputStream>T withStream(U stream,@ClosureParams(value=FirstParam.class) Closure<T> closure) throws IOException {
+  try {
+    T result=closure.call(stream);
+    InputStream temp=stream;
+    stream=null;
+    temp.close();
+    return result;
+  }
+  finally {
+    closeWithWarning(stream);
+  }
+}
+","allows this input stream to be used within the closure , ensuring that it is flushed and closed before this method returns .",why,"// Executes a closure with the provided InputStream, ensuring proper resource cleanup.",0.8605832457542419
+90,"    public void run(WorkData data) {
+        try {
+            Item item = (Item) data.getAttribute(""item"");
+            if (item == null) {
+                logger.warn(""item is null on command "" + getName());
+                return;
+            }
+            DbQuery query = DbManager.getInstance().createQuery(getApplication().getProperty(""items-table"") + ""_comments"");
+            query.addAndPredicate(""item_id"", item.getId(), DbQuery.EQUALS);
+            List comments =DbManager.getInstance().select(query);
+            data.setAttribute(""comments"",comments);
+        } catch (Exception e) {
+            logger.error(""cannot execute commnad "" + getName(), e);
+        }
+
+    }
+",main processing method for the abstractcommand object,why,// Fetch comments for the specified item and handle exceptions gracefully.,0.862493098
+91,"public static boolean implementsZeroArgMethod(ClassNode classNode,String methodName){
+  return implementsMethod(classNode,methodName,new Class[0]);
+}
+",tests whether the clasnode implements the specified method name,what,// Checks if the specified class implements a method with no arguments by name.,0.895479679
+92,"	public boolean isManyToMany(AbstractType from, AbstractType to) {
+		return isRelatedBy(from, to, Association.ManyToMany);
+	}
+",returns true if the association between the two entities is many to many,property,// Checks if a many-to-many relationship exists between two AbstractType instances.,0.8866421580314636
+93,"  public void resetGUI(){
+	 stateLabel = null;
+  }
+",will set statelabel to null,what,// Resets the GUI by clearing the state label reference.,0.8650868535041809
+94,"@NotNull public static String normalize(@NotNull String path){
+  int start=0;
+  boolean separator=false;
+  if (SystemInfo.isWindows) {
+    if (path.startsWith(""//"")) {
+      start=2;
+      separator=true;
+    }
+ else     if (path.startsWith(""\\\\"")) {
+      return normalizeTail(0,path,false);
+    }
+  }
+  for (int i=start; i < path.length(); ++i) {
+    final char c=path.charAt(i);
+    if (c == '/') {
+      if (separator) {
+        return normalizeTail(i,path,true);
+      }
+      separator=true;
+    }
+ else     if (c == '\\') {
+      return normalizeTail(i,path,separator);
+    }
+ else {
+      separator=false;
+    }
+  }
+  return path;
+}
+","converts back slashes to forward slashes removes double slashes inside the path , e . g . "" x / y / / z "" = > "" x / y / z """,noisy,// Normalizes file path separators based on the operating system.,0.819657564
+95,"        public void show() {
+            refresh();
+            mujmail.getDisplay().setCurrent( this);
+        }
+",shows the clear database form,what,// Refresh display and set the current view to this instance.,0.842130721
+96,"public V put(K key,V value){
+  m_keys.add(key);
+  m_values.add(value);
+  return null;
+}
+",put key & value,noisy,// Adds a key-value pair to the collections and returns null.,0.8439793586730957
+97,"public V get(Map<?, V> map){
+		for (Object k : keys){
+			V v = map.get(k);
+			if (v != null){
+				return v;
+			}
+		}
+		return null;
+	}",get the first matching value in the map .,what,// Retrieve the first non-null value from the map using the specified keys.,0.8953955769538879
+98,"private void obtainButtonBarBackground() {
+        try {
+            setButtonBarBackgroundColor(ThemeUtil.getColor(this, R.attr.buttonBarBackground));
+        } catch (NotFoundException e) {
+            int resourceId = ThemeUtil.getResId(this, R.attr.buttonBarBackground, -1);
+
+            if (resourceId != -1) {
+                setButtonBarBackground(resourceId);
+            } else {
+                setButtonBarBackground(null);
+            }
+        }
+    }",obtains the background of the button bar from the activity ' s theme .,what,"// Sets the button bar background color based on the current theme, handling resource not found gracefully.",0.876530111
+99,"	public void reset() {
+
+		boolean wasTimerRunning = false;
+
+		// Timer running?
+		if (this.timer != null) {
+
+			wasTimerRunning = true;
+
+			// Stop the timer.
+			stop();
+		}
+
+		// Reset remaining timer delay to initial value.
+		this.remainingDelayMillis = this.delayMillis;
+
+		// Was timer running?
+		if (wasTimerRunning) {
+
+			// Restart the timer.
+			start();
+		}
+	}
+",reset the timer,what,"// Resets the timer to its initial delay, restarting it if it was previously running.",0.869422197
+100,"    public String getName () {
+        return document_name;
+    }
+",retrieve the name property,what,// Returns the name of the document.,0.8727096915245056
+101,"	private JLabel getJlFirstName() {
+		if(jlFirstName == null) {
+			jlFirstName = new JLabel(""First name:"");
+		}
+
+		return jlFirstName;
+	}
+",get the first name label,what,// Lazy initializes and returns the JLabel for the first name field.,0.8792263865470886
+102,"public static long[] preprocessSpooky4(final BitVector bv,final long seed){
+  final long length=bv.length();
+  if (length < Long.SIZE * 2)   return null;
+  final long[] state=new long[4 * (int)(length + Long.SIZE * 2) / (4 * Long.SIZE)];
+  long h0, h1, h2, h3;
+  h0=seed;
+  h1=seed;
+  h2=ARBITRARY_BITS;
+  h3=ARBITRARY_BITS;
+  long remaining=length;
+  long pos=0;
+  int p=0;
+  for (; ; ) {
+    h2+=bv.getLong(pos + 0 * Long.SIZE,pos + 1 * Long.SIZE);
+    h3+=bv.getLong(pos + 1 * Long.SIZE,pos + 2 * Long.SIZE);
+    h2=Long.rotateLeft(h2,50);
+    h2+=h3;
+    h0^=h2;
+    h3=Long.rotateLeft(h3,52);
+    h3+=h0;
+    h1^=h3;
+    h0=Long.rotateLeft(h0,30);
+    h0+=h1;
+    h2^=h0;
+    h1=Long.rotateLeft(h1,41);
+    h1+=h2;
+    h3^=h1;
+    h2=Long.rotateLeft(h2,54);
+    h2+=h3;
+    h0^=h2;
+    h3=Long.rotateLeft(h3,48);
+    h3+=h0;
+    h1^=h3;
+    h0=Long.rotateLeft(h0,38);
+    h0+=h1;
+    h2^=h0;
+    h1=Long.rotateLeft(h1,37);
+    h1+=h2;
+    h3^=h1;
+    h2=Long.rotateLeft(h2,62);
+    h2+=h3;
+    h0^=h2;
+    h3=Long.rotateLeft(h3,34);
+    h3+=h0;
+    h1^=h3;
+    h0=Long.rotateLeft(h0,5);
+    h0+=h1;
+    h2^=h0;
+    h1=Long.rotateLeft(h1,36);
+    h1+=h2;
+    h3^=h1;
+    state[p + 0]=h0;
+    state[p + 1]=h1;
+    state[p + 2]=h2;
+    state[p + 3]=h3;
+    p+=4;
+    if (remaining >= Long.SIZE * 6) {
+      h0+=bv.getLong(pos + 2 * Long.SIZE,pos + 3 * Long.SIZE);
+      h1+=bv.getLong(pos + 3 * Long.SIZE,pos + 4 * Long.SIZE);
+      remaining-=4 * Long.SIZE;
+      pos+=4 * Long.SIZE;
+    }
+ else     return state;
+  }
+}
+",preprocesses a bit vector so that spookyhash 4 - word - state can be computed in constant time on all prefixes .,why,// Process the BitVector 'bv' into a state array for SpookyHash4 based on the provided seed.,0.8710970282554626
+103,"    public void print(String destDir, String lineSeparator) {
+
+        String name = getLocalName();
+
+        //-- open output file
+        String filename = getFilename(destDir);
+
+        File file = new File(filename);
+        JSourceWriter jsw = null;
+        try {
+            jsw = new JSourceWriter(new FileWriter(file));
+        }
+        catch(java.io.IOException ioe) {
+            System.out.println(""unable to create class file: "" + filename);
+            return;
+        }
+        if (lineSeparator == null) {
+            lineSeparator = System.getProperty(""line.separator"");
+        }
+        jsw.setLineSeparator(lineSeparator);
+        print(jsw);
+        jsw.close();
+        
+    } //-- print
+",prints the source code for this jstructure to the destination directory,what,"// Creates and writes to an output file, using specified line separator.",0.8451334238052368
+104,"protected static ISREInstall getSREInstallFor(ILaunchConfiguration configuration,
+			ILaunchConfigurationAccessor configAccessor,
+			IJavaProjectAccessor projectAccessor) throws CoreException {
+		assert configAccessor != null;
+		assert projectAccessor != null;
+		final ISREInstall sre;
+		if (configAccessor.getUseProjectSREFlag(configuration)) {
+			sre = getProjectSpecificSRE(configuration, true, projectAccessor);
+		} else if (configAccessor.getUseSystemSREFlag(configuration)) {
+			sre = SARLRuntime.getDefaultSREInstall();
+			verifySREValidity(sre, sre.getId());
+		} else  {
+			final String runtime = configAccessor.getSREId(configuration);
+			sre = SARLRuntime.getSREFromId(runtime);
+			verifySREValidity(sre, runtime);
+		}
+
+		if (sre == null) {
+			throw new CoreException(SARLEclipsePlugin.getDefault().createStatus(IStatus.ERROR,
+					Messages.SARLLaunchConfigurationDelegate_0));
+		}
+
+		return sre;
+	}",replies the sre installation to be used for the given configuration .,why,// Retrieves the appropriate SRE installation based on launch configuration settings.,0.8710072636604309
+105,"	public void subtractTimeUnits(int timeUnits) {
+		AppContext.getDataManager().markForUpdate(this);
+		this.timeUnits -= timeUnits;
+	}
+",subtracts timeunits from the unit timeunits,what,// Marks the current object for update and subtracts the specified time units.,0.8519625067710876
+106,"    public Walker at(String state) {
+        if (!getProcessInstance().isActive(state)) {
+            throw new RuntimeException(""State '"" + state + ""' not reached."");
+        }
+        return this;
+    }
+",checks if the walker is at the specified state,what,// Checks if the specified state is active; throws an exception if not.,0.9033495187759399
+107,"	protected void addValuePropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString(""_UI_RandomListType_value_feature""),
+				 getString(""_UI_PropertyDescriptor_description"", ""_UI_RandomListType_value_feature"", ""_UI_RandomListType_type""),
+				 Schema1Package.eINSTANCE.getRandomListType_Value(),
+				 true,
+				 ItemPropertyDescriptor.REAL_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+",this adds a property descriptor for the value feature,why,// Adds a property descriptor for the 'value' feature of the RandomListType to facilitate UI property editing.,0.9296330213546753
+108,"	public void startServing() {
+		log.trace(""start serving"");
+		// notify all clients that serving started
+		myServer.startServing(intCurrentPageNum, intPageNum, strSplitedFileDir,
+				strPdfFileName);
+	}
+",map start serving method to gui components,why,// Initiates the serving process and informs clients of the current page.,0.8680248856544495
+109,"void append(@NonNull Node<E> first, @NonNull Node<E> last) {
+    for (;;) {
+      Node<E> t = tail;
+      if (casTail(t, last)) {
+        t.lazySetNext(first);
+        if (factory == OPTIMISIC) {
+          return;
+        }
+        for (;;) {
+          first.complete();
+          if (first == last) {
+            return;
+          }
+          Node<E> next = first.getNextRelaxed();
+          if (next.value == null) {
+            first.next = null; // reduce nepotism
+          }
+          first = next;
+        }
+      }
+      Node<E> node = transferOrCombine(first, last);
+      if (node == null) {
+        first.await();
+        return;
+      } else if (node != first) {
+        last = node;
+      }
+    }
+  }",adds the linked list of nodes to the queue .,how-it-is-done,"// Atomically appends a range of nodes to the tail, handling completion and potential contention.",0.8823637366294861
+110,"        public void error(final TransformerException e) {
+            getListener().error(""xsddoc caused an error: "" + XMLUtil.getLocallizedMessageAndLocation(e));
+        }
+",handler for errors in transformations,why,// Log the error message with context when a TransformerException occurs.,0.8538950085639954
+111,"public long rangeCount(final boolean exact,final Resource s,final URI p,final Value o,final Resource... c) throws Exception {
+  if (c == null) {
+    throw new IllegalArgumentException();
+  }
+  final UUID uuid=UUID.randomUUID();
+  final ConnectOptions opts=mgr.newQueryConnectOptions(sparqlEndpointURL,uuid,tx);
+  opts.addRequestParam(""ESTCARD"");
+  if (exact) {
+    opts.addRequestParam(""exact"",""true"");
+  }
+  if (s != null) {
+    opts.addRequestParam(""s"",EncodeDecodeValue.encodeValue(s));
+  }
+  if (p != null) {
+    opts.addRequestParam(""p"",EncodeDecodeValue.encodeValue(p));
+  }
+  if (o != null) {
+    opts.addRequestParam(""o"",EncodeDecodeValue.encodeValue(o));
+  }
+  opts.addRequestParam(""c"",EncodeDecodeValue.encodeContexts(c));
+  JettyResponseListener resp=null;
+  try {
+    opts.setAcceptHeader(ConnectOptions.MIME_APPLICATION_XML);
+    checkResponseCode(resp=doConnect(opts));
+    final RangeCountResult result=rangeCountResults(resp);
+    return result.rangeCount;
+  }
+  finally {
+    if (resp != null)     resp.abort();
+  }
+}
+",perform a range count on the statement indices for a given triple ( quad ) pattern .,why,"// Retrieves the count of resources in specified contexts, optionally filtered by exact matches.",0.8516475558280945
+112,"public static Pattern selection(Pattern pattern1, Pattern pattern2)
+   {
+      if (pattern1 == null || pattern2 == null)
+      {
+         throw new IllegalArgumentException(""Neither pattern can be null"");
+      }
+      return new SelectPattern(pattern1, pattern2);
+   }",a pattern which matches pattern1 followed by pattern2 and returns the longer of the two matches .,how-it-is-done,// Validates input patterns and returns a new SelectPattern combining them.,0.8559170365333557
+113,"public boolean isEnabled(LintCategory lc){
+  return values.contains(lc);
+}
+",checks if a warning category is enabled .,what,// Check if the specified LintCategory is currently enabled.,0.8955151438713074
+114,"public String consumeAttributeKey(){
+  int start=pos;
+  while (!isEmpty() && (matchesWord() || matchesAny('-','_',':')))   pos++;
+  return queue.substring(start,pos);
+}
+","consume an attribute key off the queue ( letter , digit , - , _ , : "" )",noisy,// Extract and return a key from the current position until a non-word character is encountered.,0.8277294039726257
+115,"    public boolean isSuccessful() {
+        return isProcessingSuccessful;
+    }
+",indicates whether the processing was successful,what,// Returns true if the processing was successful.,0.9030316472053528
+116,"public static int[] copyOfRange(int[] original,int start,int end){
+  if (start <= end) {
+    if (original.length >= start && 0 <= start) {
+      int length=end - start;
+      int copyLength=Math.min(length,original.length - start);
+      int[] copy=new int[length];
+      System.arraycopy(original,start,copy,0,copyLength);
+      return copy;
+    }
+    throw new ArrayIndexOutOfBoundsException();
+  }
+  throw new IllegalArgumentException();
+}
+","copies elements in original array to a new array , from index start ( inclusive ) to end ( exclusive ) .",how-it-is-done,"// Creates a new array by copying a specified range from the original array, ensuring valid indices and length constraints.",0.8515016436576843
+117,"public static String trimSize(String str,int size){
+  if (str == null)   return str;
+  if (size <= 0)   throw new IllegalArgumentException(""Trim size invalid: "" + size);
+  int length=str.length();
+  if (length < size / 2)   return str;
+  try {
+    byte[] bytes=str.getBytes(""UTF-8"");
+    if (bytes.length <= size)     return str;
+    byte[] result=new byte[size];
+    System.arraycopy(bytes,0,result,0,size);
+    return new String(result,""UTF-8"");
+  }
+ catch (  UnsupportedEncodingException e) {
+    log.log(Level.SEVERE,str,e);
+  }
+  return str;
+}
+",trim to max byte size,why,"// Trims the input string to a specified byte size, ensuring proper UTF-8 encoding.",0.8679581880569458
+118,"  private void storeDefaultBeans() {
+    //the session bean
+    m_WebSession.setAttribute(""jwma.session"", this);
+    //the HtmlHelper bean
+    m_WebSession.setAttribute(""jwma.htmlhelper"", m_HtmlHelper);
+    //a reference to the i18n classloader
+    m_WebSession.setAttribute(""jwma.resourceloader"", JwmaKernel.getReference().getResourceClassLoader());
+  }//storeDefaultBeans
+",stores the default beans of any session,what,// Store default beans in the session for later use in the web application.,0.881342888
+119,"	public int logIntoAccount(String username, String passwort) throws ConnectionException{
+		String command = ""do?a=PlayerAction&cmd=logIntoAccount"";
+		String message;
+		String response;
+		int responseCode = 0;
+		
+		JSONStringer json = new JSONStringer();
+		try {
+			json.object();
+			json.key(""nickname"").value(username);
+			json.key(""password"").value(passwort);
+			json.endObject();
+			
+			message = json.toString();
+			System.out.println(json.toString());
+			
+			response = sendToServer(command, message);
+			responseCode = extractResponseCode(response);
+		} catch (Exception e) {
+			throw new ConnectionException(""Fehler beim Einloggen: ""+e.getMessage());
+		}
+		
+		return responseCode;
+	}
+",methode zum einloggen in ein spiel,noisy,// Sends login credentials to the server and returns the response code.,0.7941411137580872
+120,"public BinaryDictionary(Context context,ByteBuffer byteBuffer,int dicTypeId){
+  if (byteBuffer != null) {
+    if (byteBuffer.isDirect()) {
+      mNativeDictDirectBuffer=byteBuffer;
+    }
+ else {
+      mNativeDictDirectBuffer=ByteBuffer.allocateDirect(byteBuffer.capacity());
+      byteBuffer.rewind();
+      mNativeDictDirectBuffer.put(byteBuffer);
+    }
+    mDictLength=byteBuffer.capacity();
+    mNativeDict=openNative(mNativeDictDirectBuffer,TYPED_LETTER_MULTIPLIER,FULL_WORD_FREQ_MULTIPLIER,mDictLength);
+  }
+  mDicTypeId=dicTypeId;
+}
+",create a dictionary from a byte buffer .,what,// Initializes a BinaryDictionary with a direct or allocated buffer from the provided ByteBuffer.,0.8850897550582886
+121,"public static boolean floatArrayEquals(float[] x,float[] y,float tol){
+  for (int i=0; i < x.length; i+=1) {
+    if (x[i] == 0) {
+      return y[i] == 0;
+    }
+    if (Math.abs((y[i] - x[i]) / x[i]) > tol) {
+      return false;
+    }
+  }
+  return true;
+}
+",compare two float arrays using a given tolerance,how-it-is-done,"// Compares two float arrays for equality within a specified tolerance, accounting for zero values.",0.895237923
+122,"@Override protected void sendData(final OutputStream out) throws IOException {
+  LOG.trace(""enter sendData(OutputStream out)"");
+  if (lengthOfData() == 0) {
+    LOG.debug(""No data to send."");
+    return;
+  }
+  final byte[] tmp=new byte[4096];
+  final InputStream instream=source.createInputStream();
+  try {
+    int len;
+    while ((len=instream.read(tmp)) >= 0) {
+      out.write(tmp,0,len);
+    }
+  }
+  finally {
+    instream.close();
+  }
+}
+","write the data in "" source "" to the specified stream .",what,"// Sends data to the provided OutputStream if available, reading in chunks from the source InputStream.",0.8652092814445496
+123,"    public ReusableStringBuffer append(String s) {
+	if (s == null) {
+	    s = String.valueOf(s);
+	}
+
+        int newLength = s.length() + length;
+        if(newLength > value.length) {
+            expandCapacity(newLength);
+        }
+
+        s.getChars(0, s.length(), value, length);
+        setLength(newLength);
+
+        return this;
+    }   
+",append the given string to the end of this reusablestringbuffer,what,"// Appends a string to the end of the buffer, expanding capacity if needed.",0.86839813
+124,"	public void delete(Employees entity) {
+		EntityManagerHelper
+				.log(""deleting Employees instance"", Level.INFO, null);
+		try {
+			entity = getEntityManager().getReference(Employees.class,
+					entity.getId());
+			getEntityManager().remove(entity);
+			EntityManagerHelper.log(""delete successful"", Level.INFO, null);
+		} catch (RuntimeException re) {
+			EntityManagerHelper.log(""delete failed"", Level.SEVERE, re);
+			throw re;
+		}
+	}
+",delete a persistent employees entity,what,// Deletes the specified Employees entity from the database and logs the operation result.,0.8625361323356628
+125,"public MonthDateFormat(Locale locale,int chars){
+  this(TimeZone.getDefault(),locale,chars,true,false);
+}
+",creates a new instance for the specified time zone .,why,"// Constructs a MonthDateFormat with the default time zone, specified locale, and character limit, enabling parsing and disabling strict mode.",0.8737236261367798
+126,"@Override
+    public ReaderT<W,T,R> peek(final Consumer<? super R> peek) {
+        return of(run.peek(reader -> reader.mapFn(a -> {
+            peek.accept(a);
+            return a;
+        })));
+    }",peek at the current value of the future,what,// Returns a new ReaderT that applies a side-effect function to each value while preserving the original ReaderT structure.,0.8478103280067444
+127,"    private void setCertificateToPartner( Partner partner, KeystoreCertificate certificate, int category, int prio){
+        partner.getPartnerCertificateInformationList().insertNewCertificate(certificate.getSerialNumberDEC(), category, prio);
+        this.certificateAccess.storePartnerCertificateInformationList(partner);
+        //display the changes in the certificates for the user in the log
+        this.logger.fine( partner.getPartnerCertificateInformationList().getCertificatePurposeDescription(this.certificateManager, partner, category));
+    }
+",sets a certificate to a partner,what,// Updates the partner's certificate information and logs the purpose description.,0.8703330755233765
+128,"public void register(Route route){
+  Integer oldSize=Integer.valueOf(_routeHashTable.size());
+  _routeHashTable.put(route.getId(),route);
+  int id=Integer.parseInt(route.getId());
+  if (id > _id) {
+    _id=id;
+  }
+  setDirtyAndFirePropertyChange(LISTLENGTH_CHANGED_PROPERTY,oldSize,Integer.valueOf(_routeHashTable.size()));
+}
+",remember a namedbean object created outside the manager .,what,// Registers a new route and updates the maximum ID and listeners on size change.,0.850650966
+129,"public byte[] decrypt(byte[] data,final String ref,final boolean isEncryption,final String cacheName,final boolean alwaysUseRC4,final boolean isString) throws PdfSecurityException {
+  if (getBooleanValue(PDFflags.IS_FILE_ENCRYPTED) || isEncryption) {
+    BufferedOutputStream streamCache=null;
+    BufferedInputStream bis=null;
+    boolean isAES=false;
+    byte[] AESData=null;
+    if (cacheName != null) {
+      try {
+        if (data == null) {
+          AESData=new byte[16];
+          final FileInputStream fis=new FileInputStream(cacheName);
+          fis.read(AESData);
+          fis.close();
+        }
+        final File tempFile2=File.createTempFile(""jpedal"","".raw"",new File(ObjectStore.temp_dir));
+        cachedObjects.put(tempFile2.getAbsolutePath(),""x"");
+        ObjectStore.copy(cacheName,tempFile2.getAbsolutePath());
+        final File rawFile=new File(cacheName);
+        rawFile.delete();
+        streamCache=new BufferedOutputStream(new FileOutputStream(cacheName));
+        bis=new BufferedInputStream(new FileInputStream(tempFile2));
+      }
+ catch (      final IOException e1) {
+        LogWriter.writeLog(""Exception "" + e1 + "" in decrypt"");
+      }
+    }
+    int keyLength=this.keyLength;
+    String algorithm=""RC4"", keyType=""RC4"";
+    IvParameterSpec ivSpec=null;
+    final PdfObject AESObj;
+    if (!isString) {
+      AESObj=StmFObj;
+    }
+ else {
+      AESObj=StrFObj;
+    }
+    if (certificate != null) {
+      setPasswordFromCertificate(AESObj);
+      AESObj.setIntNumber(PdfDictionary.Length,16);
+    }
+    if (!alwaysUseRC4 && AESObj == null && isAESIdentity) {
+      return data;
+    }
+    if (AESObj != null) {
+      final String cryptName=AESObj.getName(PdfDictionary.CFM);
+      if (cryptName != null && !alwaysUseRC4 && ((cryptName.equals(""AESV2"") || (cryptName.equals(""AESV3""))))) {
+        cipher=null;
+        algorithm=""AES/CBC/PKCS5Padding"";
+        keyType=""AES"";
+        isAES=true;
+        final byte[] iv=new byte[16];
+        if (AESData != null) {
+          System.arraycopy(AESData,0,iv,0,16);
+        }
+ else {
+          System.arraycopy(data,0,iv,0,16);
+        }
+        ivSpec=new IvParameterSpec(iv);
+        if (data == null) {
+          try {
+            bis.skip(16);
+          }
+ catch (          final IOException e) {
+            LogWriter.writeLog(""Exception: "" + e.getMessage());
+          }
+        }
+ else {
+          final int origLen=data.length;
+          final int newLen=origLen - 16;
+          byte[] newData=new byte[newLen];
+          System.arraycopy(data,16,newData,0,newLen);
+          data=newData;
+          final int diff=(data.length & 15);
+          int newLength=data.length;
+          if (diff > 0) {
+            newLength=newLength + 16 - diff;
+            newData=new byte[newLength];
+            System.arraycopy(data,0,newData,0,data.length);
+            data=newData;
+          }
+          if (rev == 5) {
+            try {
+              final byte[] finalKey=new byte[32];
+              System.arraycopy(encryptionKey,0,finalKey,0,finalKey.length);
+              return decodeAES(finalKey,data,iv);
+            }
+ catch (            final Exception e) {
+              throw new PdfSecurityException(""Exception "" + e + "" decrypting content in AES revision 5"");
+            }
+          }
+        }
+      }
+    }
+    byte[] currentKey=new byte[keyLength];
+    if (!ref.isEmpty()) {
+      currentKey=new byte[keyLength + 5];
+    }
+    System.arraycopy(encryptionKey,0,currentKey,0,keyLength);
+    try {
+      final byte[] finalKey;
+      if (rev == 5) {
+        finalKey=new byte[32];
+        System.arraycopy(currentKey,0,finalKey,0,finalKey.length);
+      }
+ else {
+        if (!ref.isEmpty()) {
+          final int pointer=ref.indexOf(' ');
+          final int pointer2=ref.indexOf(' ',pointer + 1);
+          final int obj=Integer.parseInt(ref.substring(0,pointer));
+          final int gen=Integer.parseInt(ref.substring(pointer + 1,pointer2));
+          currentKey[keyLength]=((byte)(obj & 0xff));
+          currentKey[keyLength + 1]=((byte)((obj >> 8) & 0xff));
+          currentKey[keyLength + 2]=((byte)((obj >> 16) & 0xff));
+          currentKey[keyLength + 3]=((byte)(gen & 0xff));
+          currentKey[keyLength + 4]=((byte)((gen >> 8) & 0xff));
+        }
+        finalKey=new byte[Math.min(currentKey.length,16)];
+        if (!ref.isEmpty()) {
+          final MessageDigest currentDigest=MessageDigest.getInstance(""MD5"");
+          currentDigest.update(currentKey);
+          if (isAES && keyLength >= 16) {
+            final byte[] salt={(byte)0x73,(byte)0x41,(byte)0x6c,(byte)0x54};
+            currentDigest.update(salt);
+          }
+          System.arraycopy(currentDigest.digest(),0,finalKey,0,finalKey.length);
+        }
+ else {
+          System.arraycopy(currentKey,0,finalKey,0,finalKey.length);
+        }
+      }
+      if (cipher == null) {
+        cipher=Cipher.getInstance(algorithm);
+      }
+      final SecretKey testKey=new SecretKeySpec(finalKey,keyType);
+      if (isEncryption) {
+        cipher.init(Cipher.ENCRYPT_MODE,testKey);
+      }
+ else {
+        if (ivSpec == null) {
+          cipher.init(Cipher.DECRYPT_MODE,testKey);
+        }
+ else {
+          cipher.init(Cipher.DECRYPT_MODE,testKey,ivSpec);
+        }
+      }
+      if (streamCache != null) {
+        final CipherInputStream cis=new CipherInputStream(bis,cipher);
+        int nextByte;
+        while (true) {
+          nextByte=cis.read();
+          if (nextByte == -1) {
+            break;
+          }
+          streamCache.write(nextByte);
+        }
+        cis.close();
+        streamCache.close();
+        bis.close();
+      }
+      if (data != null) {
+        data=cipher.doFinal(data);
+      }
+    }
+ catch (    final Exception e) {
+      throw new PdfSecurityException(""Exception "" + e + "" decrypting content"");
+    }
+  }
+  if (alwaysReinitCipher) {
+    cipher=null;
+  }
+  return data;
+}
+",reads the line / s from file which make up an object includes move,noisy,"```java
+// Decrypts PDF content using specified encryption method and handling potential caching.
+```",0.8105863332748413
+130,"private void getOffset(long time, boolean local, int NonExistingTimeOpt, int DuplicatedTimeOpt, int[] offsets) {
+        complete();
+        TimeZoneRule rule = null;
+        if (historicTransitions == null) {
+            rule = initialRule;
+        } else {
+            long tstart = getTransitionTime(historicTransitions.get(0),
+                    local, NonExistingTimeOpt, DuplicatedTimeOpt);
+            if (time < tstart) {
+                rule = initialRule;
+            } else {
+                int idx = historicTransitions.size() - 1;
+                long tend = getTransitionTime(historicTransitions.get(idx),
+                        local, NonExistingTimeOpt, DuplicatedTimeOpt);
+                if (time > tend) {
+                    if (finalRules != null) {
+                        rule = findRuleInFinal(time, local, NonExistingTimeOpt, DuplicatedTimeOpt);
+                    }
+                    if (rule == null) {
+                        // no final rules or the given time is before the first transition
+                        // specified by the final rules -> use the last rule
+                        rule = (historicTransitions.get(idx)).getTo();
+                    }
+                } else {
+                    // Find a historical transition
+                    while (idx >= 0) {
+                        if (time >= getTransitionTime(historicTransitions.get(idx),
+                                local, NonExistingTimeOpt, DuplicatedTimeOpt)) {
+                            break;
+                        }
+                        idx--;
+                    }
+                    rule = (historicTransitions.get(idx)).getTo();
+                }
+            }
+        }
+        offsets[0] = rule.getRawOffset();
+        offsets[1] = rule.getDSTSavings();
+    }",getoffset internal implementation,noisy,// Retrieves the timezone offset based on the provided time and historical transition rules.,0.8408085703849792
+131,"public void queueEvent(KeenProject project, String eventCollection, Map<String, Object> event,
+                           Map<String, Object> keenProperties, final KeenCallback callback) {
+
+        if (!isActive) {
+            handleLibraryInactive(callback);
+            return;
+        }
+
+        if (project == null && defaultProject == null) {
+            handleFailure(null,
+                          project,
+                          eventCollection,
+                          event,
+                          keenProperties,
+                          new IllegalStateException(
+                                  ""No project specified, but no default project found""));
+            return;
+        }
+        KeenProject useProject = (project == null ? defaultProject : project);
+
+        try {
+            // Build the event
+            Map<String, Object> newEvent =
+                    validateAndBuildEvent(useProject, eventCollection, event, keenProperties);
+
+            // Serialize the event into JSON.
+            StringWriter writer = new StringWriter();
+            jsonHandler.writeJson(writer, newEvent);
+            String jsonEvent = writer.toString();
+            KeenUtils.closeQuietly(writer);
+
+            try {
+                // Save the JSON event out to the event store.
+                Object handle = eventStore.store(useProject.getProjectId(), eventCollection, jsonEvent);
+
+                if (eventStore instanceof KeenAttemptCountingEventStore) {
+                    synchronized (attemptsLock) {
+                        Map<String, Integer> attempts = getAttemptsMap(useProject.getProjectId(), eventCollection);
+                        attempts.put("""" + handle.hashCode(), maxAttempts);
+                        setAttemptsMap(useProject.getProjectId(), eventCollection, attempts);
+                    }
+                }
+            } catch(IOException ex) {
+                KeenLogging.log(""Failed to set the event POST attempt count. The event was still "" +
+                        ""queued and will we POSTed."");
+            }
+            handleSuccess(callback, project, eventCollection, event, keenProperties);
+        } catch (Exception e) {
+            handleFailure(callback, project, eventCollection, event, keenProperties, e);
+        }
+    }",synchronously queues an event for publishing .,why,"// Queue an event for processing, ensuring project validity and handling potential errors.",0.8724591135978699
+132,"public Token match(int tok) throws ParseException {
+  if (Debug.parserDebug) {
+    Debug.println(""match "" + tok);
+  }
+  if (tok > START && tok < END) {
+    if (tok == ID) {
+      if (!startsId())       throw new ParseException(buffer + ""\nID expected"",ptr);
+      String id=getNextId();
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=id;
+      this.currentMatch.tokenType=ID;
+    }
+ else     if (tok == SAFE) {
+      if (!startsSafeToken())       throw new ParseException(buffer + ""\nID expected"",ptr);
+      String id=ttokenSafe();
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=id;
+      this.currentMatch.tokenType=SAFE;
+    }
+ else     if (tok == ID_NO_WHITESPACE) {
+      if (!startsIdNoWhiteSpace())       throw new ParseException(buffer + ""\nID no white space expected"",ptr);
+      String id=getNextIdNoWhiteSpace();
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=id;
+      this.currentMatch.tokenType=ID_NO_WHITESPACE;
+    }
+ else {
+      String nexttok=getNextId();
+      Integer cur=currentLexer.get(Utils.toUpperCase(nexttok));
+      if (cur == null || cur.intValue() != tok)       throw new ParseException(buffer + ""\nUnexpected Token : "" + nexttok,ptr);
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=nexttok;
+      this.currentMatch.tokenType=tok;
+    }
+  }
+ else   if (tok > END) {
+    char next=lookAhead(0);
+    if (tok == DIGIT) {
+      if (!isDigit(next))       throw new ParseException(buffer + ""\nExpecting DIGIT"",ptr);
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=String.valueOf(next);
+      this.currentMatch.tokenType=tok;
+      consume(1);
+    }
+ else     if (tok == ALPHA) {
+      if (!isAlpha(next))       throw new ParseException(buffer + ""\nExpecting ALPHA"",ptr);
+      this.currentMatch=new Token();
+      this.currentMatch.tokenValue=String.valueOf(next);
+      this.currentMatch.tokenType=tok;
+      consume(1);
+    }
+  }
+ else {
+    char ch=(char)tok;
+    char next=lookAhead(0);
+    if (next == ch) {
+      consume(1);
+    }
+ else     throw new ParseException(buffer + ""\nExpecting  >>>"" + ch+ ""<<< got >>>""+ next+ ""<<<"",ptr);
+  }
+  return this.currentMatch;
+}
+",match the given token or throw an exception if no such token can be matched.,property,// Matches the provided token type and updates the current match accordingly while handling parsing errors.,0.8652962446212769
+133,"private static img createImage(String AD_Language,String name,String js_command,boolean enabled,boolean pressed){
+  StringBuffer imgName=new StringBuffer(name);
+  if (!enabled)   imgName.append(""D"");
+ else   if (pressed)   imgName.append(""X"");
+  imgName.append(""16.gif"");
+  img img=new img(WebEnv.getImageDirectory(imgName.toString()),name);
+  if (enabled)   img.setAlt(Msg.getMsg(AD_Language,name));
+  if (!pressed || !enabled)   img.setID(""imgButton"");
+ else   img.setID(""imgButtonPressed"");
+  img.setHeight(16);
+  img.setWidth(16);
+  img.setBorder(0);
+  img.setTitle(name);
+  return img;
+}
+","create image with name , id of button _ name and set p _ command onclick",how-it-is-done,// Constructs an image based on state (enabled/pressed) and sets attributes accordingly.,0.8394795656204224
+134,"public void add(ClosingAwareWebDriver driver){
+  drivers.add(driver);
+}
+",register webdriver instance that should be terminated at the end of the suite,what,// Adds a ClosingAwareWebDriver instance to the collection of drivers.,0.8812294006347656
+135,"public static Set<Policy> policies(Config config) {
+    BasicSettings settings = new BasicSettings(config);
+    return settings.admission().stream().map(admission ->
+      new SegmentedLruPolicy(admission, config)
+    ).collect(toSet());
+  }",returns all variations of this policy based on the configuration parameters .,property,// Creates a set of SegmentedLruPolicy instances from admission settings in the given configuration.,0.8530796766281128
+136,"public static LongStream zipfian(int items, double constant, int events) {
+    return generate(new ZipfianGenerator(items, constant), events);
+  }","returns a sequence of events where some items are more popular than others , according to a zipfian distribution .",how-it-is-done,// Generates a stream of Zipfian-distributed values for the specified number of events.,0.8701077699661255
+137,"		protected boolean isSourceEditing() {
+			return source;
+		}
+",checks for source editing,why,// Check if the editor is currently in source editing mode.,0.862510622
+138,"    public void setLongValue(long value) throws XMLConfigurationException {
+        if (type == null) {
+            throw new XMLConfigurationException(
+                    ""The type has not been initialized"");
+        } else if (XMLConfigurationType.LONG_VALUE == type.getType()) {
+            longValue = value;
+        } else {
+            throw new XMLConfigurationException(
+                    ""The value is not of type [long]."");
+        }
+    }
+",the setter method for the long value,why,"// Validates type and assigns a long value, throwing exceptions for uninitialized types or mismatched types.",0.8648395538330078
+139,"protected Buffer checkErrorPacket() throws SQLException {
+  return checkErrorPacket(-1);
+}
+","checks for errors in the reply packet , and if none , returns the reply packet , ready for reading",how-it-is-done,// Calls the overloaded checkErrorPacket method with a default value to validate error packets.,0.8486934304237366
+140,"    public void setQueryTimeout(int seconds) throws SQLException {
+        try {
+            if(Trace.isEnabled()) Trace.trace(getId(),seconds);
+            if(seconds<0) {
+                throw Factory.getInvalidValueException(""seconds:""+seconds);
+            }
+            queryTimeout=seconds;
+            queryTimeoutSet=true;
+        } catch(Throwable e) {
+            throw convertThrowable(e);
+        }
+    }
+",sets the current query timeout in seconds,what,"// Sets the database query timeout in seconds, throwing an exception for invalid values.",0.9128870368003845
+141,"    public void setChildren(List<PartitionRule> rules) {
+        if (!rules.isEmpty()) {
+            innerRules.addAll(rules);
+        }
+    }
+",adds the given rules to the list of known sub partition rules,how-it-is-done,// Adds non-empty list of PartitionRule objects to innerRules.,0.8682317733764648
+142,"   protected void setCheckmate (boolean t) {
+      checkmate = t;
+      if (result == null)
+         result = new ChessResult((board.isBlackMove()) 
+	             ? ChessResult.BLACK_WIN
+	             : ChessResult.WHITE_WIN);
+   }
+",sets teh checkmate flag and also sets the result field to a new chessresult if and only if result was null,property,// Sets the checkmate state and determines the game result if not already set.,0.8741199970245361
+143,"public static Method[] getMethods(Class<?> clazz) {
+        final boolean legacyApproach = isGetMethodsLegacyApproach();
+
+        final List<Method> allMethods = new ArrayList<>();
+        addMethods(allMethods, clazz, legacyApproach);
+
+        return allMethods.toArray(new Method[allMethods.size()]);
+    }","gets all methods of a class , excluding those from object .",how-it-is-done,"// Retrieves all methods from the specified class, using a legacy approach if configured.",0.8698933720588684
+144,"	public Result evaluate( HttpResponseData httpResponse, Variables variables, long ruleId, java.util.Date scanStartTime ) throws DefinitionEvaluationException, SQLException{
+		Connection connection = null;
+		
+		try{
+			connection = Application.getApplication().getDatabaseConnection(Application.DatabaseAccessType.SCANNER);
+			return evaluate( httpResponse, variables, ruleId, connection, scanStartTime );
+		}
+		catch(NoDatabaseConnectionException e){
+			throw new DefinitionEvaluationException(""Database connection could not be established"", e);
+		}
+		finally{
+			if( connection != null ){
+				connection.close();
+			}
+		}
+		
+	}
+",this method evaluates the given data with this definition,what,// Establishes a database connection to evaluate rules based on the HTTP response and provided variables.,0.8611685037612915
+145,"public TrueTypeFont(int type){
+  this.type=type;
+  tables=Collections.synchronizedSortedMap(new TreeMap<String,Object>());
+}
+",creates a new instance of truetypeparser,what,// Initializes a TrueTypeFont object with a specified type and a synchronized map for font tables.,0.8455314636230469
+146,"public static String toJavaDateTimeFormat(String strftime) {
+    if (!StringUtils.contains(strftime, '%')) {
+      return replaceL(strftime);
+    }
+
+    StringBuilder result = new StringBuilder();
+
+    for (int i = 0; i < strftime.length(); i++) {
+      char c = strftime.charAt(i);
+      if (c == '%') {
+        c = strftime.charAt(++i);
+        boolean stripLeadingZero = false;
+
+        if (c == '-') {
+          stripLeadingZero = true;
+          c = strftime.charAt(++i);
+        }
+
+        if (stripLeadingZero) {
+          result.append(CONVERSIONS[c].substring(1));
+        } else {
+          result.append(CONVERSIONS[c]);
+        }
+      } else if (Character.isLetter(c)) {
+        result.append(""'"");
+        while (Character.isLetter(c)) {
+          result.append(c);
+          if (++i < strftime.length()) {
+            c = strftime.charAt(i);
+          } else {
+            c = 0;
+          }
+        }
+        result.append(""'"");
+        --i; // re-consume last char
+      } else {
+        result.append(c);
+      }
+    }
+
+    return replaceL(result.toString());
+  }","parses a string in python strftime format , returning the equivalent string in java date time format .",how-it-is-done,// Converts a strftime format string to its corresponding Java date-time format by processing special characters and applying transformations.,0.8828229308128357
+147,"	public void fightEnd() {
+		if (attackerCasualties == 0 && defenderCasualties == 0) {
+			this.activeFight = false;
+			this.attackerWins = false;
+			this.attackingBanner = null;
+			this.defendingBanner = null;
+			this.attackingProvince = null;
+			this.defendingProvince = null;
+		}
+	}
+",checks if the attacker can retreat and finishes the fight if possible,how-it-is-done,// Ends the fight if there are no casualties for either attacker or defender.,0.8677189946174622
+148,"	 protected String doSOAP(HttpServletRequest req) throws ServletException{
+
+		 throw new ServletException(""SOAP result not supported"");
+	 }   
+",returns soap xml results to the caller,property,"// Handles SOAP requests, throwing an exception for unsupported results.",0.8591393232345581
+149,"	public String getStreetLine3() {
+		return(primitive.getStreet().getLine3());
+	}
+",gets the line3 field of the address street element,what,// Retrieves the third line of the street address from the primitive object.,0.8849684596061707

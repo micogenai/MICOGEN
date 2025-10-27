@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated embeddings and FAISS indices (large binary files)
+code_embeddings.npy
+faiss_index.bin
+code_map.npy
+*.npy
+
+# Large dataset (215MB - too large for GitHub)
+parent_code_comment_with_title-final.csv
+
+# API Keys and sensitive data
+*.env
+config.ini
+
+# Models (optional - remove if you want to track model files)
+# *.bin
+# *.safetensors
+
+
